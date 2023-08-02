@@ -4,15 +4,18 @@ use crate::erc721traits::burnable::ERC721Burnable;
 use crate::erc721traits::enumerable::ERC721Enumerable;
 use crate::erc721traits::erc721::ERC721;
 use crate::erc721traits::metadata::ERC721Metadata;
+use crate::types::*;
+use storage::Storage;
+
 use soroban_sdk::{
     contract, contractimpl, contracttype, panic_with_error, Address, BytesN, Env, Map, String, Vec,
 };
 
 mod erc721traits;
-mod storage;
 mod types;
-use crate::storage::Storage;
-use crate::types::*;
+
+#[cfg(test)]
+mod tests;
 
 #[contract]
 pub struct ERC721Contract;
@@ -191,6 +194,7 @@ impl ERC721Enumerable for ERC721Contract {
 }
 
 #[cfg(feature = "burnable")]
+#[contractimpl]
 impl ERC721Burnable for ERC721Contract {
     fn burn(env: Env, caller: Address, token_id: u32) {
         let owner: Address = DataKey::TokenOwner(token_id)
@@ -211,6 +215,9 @@ impl ERC721Burnable for ERC721Contract {
         DataKey::TokenOwner(token_id).remove(&env);
 
         if cfg!(feature = "enumerable") {
+            let mut owned_index: Vec<u32> = DataKeyEnumerable::IndexToken.get(&env).unwrap();
+            let mut owned_token_index: Map<u32, u32> =
+                DataKeyEnumerable::TokenIndex.get(&env).unwrap();
             let from_index_key = DataKeyEnumerable::OwnerIndexToken(owner.clone());
             let from_token_key = DataKeyEnumerable::OwnerTokenIndex(owner.clone());
 
@@ -221,9 +228,14 @@ impl ERC721Burnable for ERC721Contract {
 
             from_index.remove(from_token.get(token_id).unwrap());
             from_token.remove(token_id);
+            owned_index.remove(owned_token_index.get(token_id).unwrap());
+            owned_token_index.remove(token_id);
 
             from_index_key.set(&env, &from_index);
             from_token_key.set(&env, &from_token);
+            DataKeyEnumerable::IndexToken.set(&env, &owned_index);
+            DataKeyEnumerable::TokenIndex.set(&env, &owned_token_index);
+
             DataKey::Balance(owner).set(&env, &from_index.len());
         } else {
             let balance_key = DataKey::Balance(owner.clone());

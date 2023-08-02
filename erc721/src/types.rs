@@ -1,6 +1,6 @@
 use soroban_sdk::{contracterror, contracttype, Address, Env, IntoVal, TryFromVal, Val};
 
-use crate::storage;
+use storage::*;
 #[contracttype]
 pub enum DataKey {
     Balance(Address),           // instance
@@ -8,7 +8,7 @@ pub enum DataKey {
     Approved(u32),              // temporary
     Operator(Address, Address), // temporary
 }
-impl storage::Storage for DataKey {
+impl Storage for DataKey {
     fn get<V: TryFromVal<Env, Val>>(&self, env: &Env) -> Option<V> {
         match self {
             DataKey::Balance(_) | DataKey::TokenOwner(_) => storage::Instance::get(env, self),

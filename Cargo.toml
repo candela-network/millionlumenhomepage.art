@@ -1,24 +1,11 @@
-[package]
-name = "millionlumenhomepage"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = ["storage", "erc721", "millionlumenhomepage"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[lib]
-crate-type = ["cdylib"]
-
-[dependencies]
+[workspace.dependencies]
 soroban-sdk = { version = "0.9.2", default-features = false }
-
-[dev_dependencies]
-soroban-sdk = { version = "0.9.2", features = ["testutils"] }
-
-[features]
-default = ["enumerable", "metadata", "burnable"]
-enumerable = []
-metadata = []
-burnable = []
+storage = { path = "./storage" }
+erc721 = { path = "./erc721" }
 
 [profile.release]
 opt-level = "z"
