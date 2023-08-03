@@ -11,14 +11,16 @@ pub enum DataKey {
 impl Storage for DataKey {
     fn get<V: TryFromVal<Env, Val>>(&self, env: &Env) -> Option<V> {
         match self {
-            DataKey::Balance(_) | DataKey::TokenOwner(_) => storage::Instance::get(env, self),
+            DataKey::Balance(_) | DataKey::TokenOwner(_) => storage::Persistent::get(env, self),
             DataKey::Approved(_) | DataKey::Operator(_, _) => storage::Temporary::get(env, self),
         }
     }
 
     fn set<V: IntoVal<Env, Val>>(&self, env: &Env, val: &V) {
         match self {
-            DataKey::Balance(_) | DataKey::TokenOwner(_) => storage::Instance::set(env, self, val),
+            DataKey::Balance(_) | DataKey::TokenOwner(_) => {
+                storage::Persistent::set(env, self, val)
+            }
             DataKey::Approved(_) | DataKey::Operator(_, _) => {
                 storage::Temporary::set(env, self, val)
             }
@@ -27,7 +29,7 @@ impl Storage for DataKey {
 
     fn has(&self, env: &Env) -> bool {
         match self {
-            DataKey::Balance(_) | DataKey::TokenOwner(_) => storage::Instance::has(env, self),
+            DataKey::Balance(_) | DataKey::TokenOwner(_) => storage::Persistent::has(env, self),
             DataKey::Approved(_) | DataKey::Operator(_, _) => storage::Temporary::has(env, self),
         }
     }
@@ -35,7 +37,7 @@ impl Storage for DataKey {
     fn bump(&self, env: &Env, expiration_ledger: u32) {
         match self {
             DataKey::Balance(_) | DataKey::TokenOwner(_) => {
-                storage::Instance::bump(env, expiration_ledger)
+                storage::Persistent::bump(env, self, expiration_ledger)
             }
             DataKey::Approved(_) | DataKey::Operator(_, _) => {
                 storage::Temporary::bump(env, self, expiration_ledger)
@@ -45,7 +47,7 @@ impl Storage for DataKey {
 
     fn remove(&self, env: &Env) {
         match self {
-            DataKey::Balance(_) | DataKey::TokenOwner(_) => storage::Instance::remove(env, self),
+            DataKey::Balance(_) | DataKey::TokenOwner(_) => storage::Persistent::remove(env, self),
             DataKey::Approved(_) | DataKey::Operator(_, _) => storage::Temporary::remove(env, self),
         }
     }
@@ -109,7 +111,7 @@ impl storage::Storage for DataKeyEnumerable {
 }
 
 #[contracterror]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Error {
     NotOwner = 0,
     NotNFT = 1,

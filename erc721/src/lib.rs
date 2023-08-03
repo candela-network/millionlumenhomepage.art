@@ -162,7 +162,9 @@ impl ERC721Metadata for ERC721Contract {
         DatakeyMetadata::Symbol.get(&env).unwrap()
     }
     fn token_uri(env: Env, token_id: u32) -> String {
-        DatakeyMetadata::Uri(token_id).get(&env).unwrap()
+        DatakeyMetadata::Uri(token_id)
+            .get(&env)
+            .unwrap_or_else(|| String::from_slice(&env, "no uri"))
     }
 }
 
@@ -301,12 +303,11 @@ impl ERC721Contract {
     }
 
     pub fn mint(env: Env, to: Address, token_id: u32) {
-        get_admin(&env).require_auth();
+        // Authorization should be handled by the caller of the actual implementation
+        // get_admin(&env).require_auth();
 
         if !env.storage().instance().has(&DataKey::TokenOwner(token_id)) {
-            env.storage()
-                .instance()
-                .set(&DataKey::TokenOwner(token_id), &to);
+            DataKey::TokenOwner(token_id).set(&env, &to);
 
             if cfg!(feature = "enumerable") {
                 let mut owned_index: Vec<u32> = DataKeyEnumerable::IndexToken.get(&env).unwrap();
@@ -335,7 +336,7 @@ impl ERC721Contract {
                 DataKey::Balance(to).set(&env, &owner_index.len());
             } else {
                 let key = DataKey::Balance(to);
-                let balance = key.get(&env).unwrap_or(0);
+                let balance: u32 = key.get(&env).unwrap_or(0);
                 key.set(&env, &(balance + 1));
             }
         }

@@ -1,9 +1,10 @@
-use soroban_sdk::{contracttype, Env};
+use soroban_sdk::{contracterror, contracttype, Env};
 #[contracttype]
-pub enum DataKey {
+pub enum MillionDataKey {
     TokenId,
+    AssetAddress,
 }
-impl storage::Storage for DataKey {
+impl storage::Storage for MillionDataKey {
     fn get<V: soroban_sdk::TryFromVal<Env, soroban_sdk::Val>>(&self, env: &Env) -> Option<V> {
         storage::Instance::get(env, self)
     }
@@ -23,4 +24,10 @@ impl storage::Storage for DataKey {
     fn remove(&self, env: &Env) {
         storage::Instance::remove(env, self)
     }
+}
+
+#[contracterror]
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum MillionError {
+    Exhausted = 1,
 }

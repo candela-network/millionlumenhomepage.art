@@ -8,7 +8,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-soroban-sdk = { workspace = true }
+soroban-sdk = { workspace = true, features = ["alloc"] }
 erc721 = { workspace = true, default-features = false, features = ["metadata"] }
 storage = { workspace = true }
 

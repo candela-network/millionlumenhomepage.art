@@ -1,19 +1,28 @@
 #![no_std]
-use erc721::{DatakeyMetadata, ERC721Metadata, ERC721};
-use soroban_sdk::{contract, contractimpl, Address, BytesN, Env, String};
+use erc721::{ERC721Metadata, ERC721};
+use soroban_sdk::{contract, contractimpl, token, Address, BytesN, Env, String};
 use storage::Storage;
 mod types;
 use crate::types::*;
+#[macro_use]
+extern crate alloc;
+
+#[cfg(test)]
+pub const MAX_SUPPLY: u32 = 0xff;
+
+#[cfg(not(test))]
+pub const MAX_SUPPLY: u32 = 0xfff;
 
 #[contract]
 pub struct Million;
 
 #[contractimpl]
 impl Million {
-    pub fn initialize(env: Env, admin: Address) {
+    pub fn initialize(env: Env, admin: Address, asset: Address) {
         let name = String::from_slice(&env, "Pixel");
         let sym = String::from_slice(&env, "PIX");
-        DataKey::TokenId.set(&env, &0);
+        MillionDataKey::TokenId.set::<u32>(&env, &0);
+        MillionDataKey::AssetAddress.set::<Address>(&env, &asset);
         erc721::ERC721Contract::initialize(env, admin, name, sym);
     }
 
@@ -21,13 +30,22 @@ impl Million {
         erc721::ERC721Contract::upgrade(env, wasm_hash)
     }
 
-    pub fn mint(env: Env, to: Address) {
+    pub fn mint(env: Env, to: Address) -> Result<(), MillionError> {
         to.require_auth();
-        let token_id = DataKey::TokenId.get(&env).unwrap_or(0);
-        DataKey::TokenId.set(&env, &(token_id + 1));
-        //let uri = at!("https://0x{}.millionlumenhomepage.art/.well-known/nft.json");
-        //DatakeyMetadata::Uri(token_id).set(&env, uri.into());
+
+        token::Client::new(
+            &env,
+            &MillionDataKey::AssetAddress.get::<Address>(&env).unwrap(),
+        )
+        .transfer(&to, &env.current_contract_address(), &2560000000);
+
+        let token_id: u32 = MillionDataKey::TokenId.get(&env).unwrap_or(0);
+        if token_id > MAX_SUPPLY {
+            return Err(MillionError::Exhausted);
+        }
+        MillionDataKey::TokenId.set::<u32>(&env, &(token_id + 1));
         erc721::ERC721Contract::mint(env, to, token_id);
+        Ok(())
     }
 
     pub fn balance_of(env: Env, owner: Address) -> u32 {
@@ -80,6 +98,18 @@ impl Million {
 
     pub fn symbol(env: Env) -> String {
         erc721::ERC721Contract::symbol(env)
+    }
+
+    pub fn token_uri(env: Env, token_id: u32) -> String {
+        let uri = format!(
+            "https://{:#05x}.millionlumenhomepage.art/.well-known/erc721.json",
+            token_id
+        );
+        String::from_slice(&env, uri.as_str())
+    }
+
+    pub fn total_supply(env: Env) -> u32 {
+        MillionDataKey::TokenId.get(&env).unwrap_or(0)
     }
 }
 
