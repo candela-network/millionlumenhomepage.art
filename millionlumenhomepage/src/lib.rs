@@ -1,7 +1,10 @@
 #![no_std]
-use erc721::{ERC721Metadata, ERC721};
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, String};
+use erc721::{DatakeyMetadata, ERC721Metadata, ERC721};
+use soroban_sdk::{contract, contractimpl, Address, BytesN, Env, String};
 use storage::Storage;
+mod types;
+use crate::types::*;
+
 #[contract]
 pub struct Million;
 
@@ -14,10 +17,16 @@ impl Million {
         erc721::ERC721Contract::initialize(env, admin, name, sym);
     }
 
+    pub fn upgrade(env: Env, wasm_hash: BytesN<32>) {
+        erc721::ERC721Contract::upgrade(env, wasm_hash)
+    }
+
     pub fn mint(env: Env, to: Address) {
         to.require_auth();
         let token_id = DataKey::TokenId.get(&env).unwrap_or(0);
         DataKey::TokenId.set(&env, &(token_id + 1));
+        //let uri = at!("https://0x{}.millionlumenhomepage.art/.well-known/nft.json");
+        //DatakeyMetadata::Uri(token_id).set(&env, uri.into());
         erc721::ERC721Contract::mint(env, to, token_id);
     }
 
@@ -74,30 +83,5 @@ impl Million {
     }
 }
 
-#[contracttype]
-enum DataKey {
-    TokenId,
-}
-impl storage::Storage for DataKey {
-    fn get<V: soroban_sdk::TryFromVal<Env, soroban_sdk::Val>>(&self, env: &Env) -> Option<V> {
-        storage::Instance::get(env, self)
-    }
-
-    fn set<V: soroban_sdk::IntoVal<Env, soroban_sdk::Val>>(&self, env: &Env, val: &V) {
-        storage::Instance::set(env, self, val)
-    }
-
-    fn has(&self, env: &Env) -> bool {
-        storage::Instance::has(env, self)
-    }
-
-    fn bump(&self, env: &Env, expiration_ledger: u32) {
-        storage::Instance::bump(env, expiration_ledger)
-    }
-
-    fn remove(&self, env: &Env) {
-        storage::Instance::remove(env, self)
-    }
-}
 #[cfg(test)]
 mod test;
