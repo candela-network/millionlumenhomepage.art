@@ -3,11 +3,7 @@ extern crate std;
 
 use super::*;
 use crate::MillionError;
-use soroban_sdk::{
-    testutils::Address as _,
-    token::{AdminClient, Client},
-    Address, Env,
-};
+use soroban_sdk::{testutils::Address as _, Address, Env};
 #[test]
 fn init() {
     let env = Env::default();
@@ -18,7 +14,7 @@ fn init() {
     let native_addr = env.register_stellar_asset_contract(asset_admin);
 
     let admin = Address::random(&env);
-    client.initialize(&admin, &native_addr);
+    client.initialize(&admin, &native_addr, &100);
 
     assert_eq!(client.name(), String::from_slice(&env, "Pixel"));
     assert_eq!(client.symbol(), String::from_slice(&env, "PIX"));
@@ -35,7 +31,7 @@ fn mint() {
     let asset_client_admin = token::AdminClient::new(&env, &native_addr);
 
     let admin = Address::random(&env);
-    client.initialize(&admin, &native_addr);
+    client.initialize(&admin, &native_addr, &2_560_000_000);
 
     assert_eq!(client.name(), String::from_slice(&env, "Pixel"));
     assert_eq!(client.symbol(), String::from_slice(&env, "PIX"));
@@ -84,7 +80,7 @@ fn mint_all() {
     let asset_client_admin = token::AdminClient::new(&env, &native_addr);
 
     let admin = Address::random(&env);
-    client.initialize(&admin, &native_addr);
+    client.initialize(&admin, &native_addr, &2_560_000_000);
 
     env.budget().reset_unlimited();
     for _ in 0..max {

@@ -1,11 +1,14 @@
 #![no_std]
-use erc721::{ERC721Metadata, ERC721};
-use soroban_sdk::{contract, contractimpl, token, Address, BytesN, Env, String};
+
+use erc721::{ERC721Metadata, Error, ERC721};
+use soroban_sdk::{
+    contract, contractimpl, panic_with_error, token, Address, Bytes, BytesN, Env, String,
+};
 use storage::Storage;
 mod types;
 use crate::types::*;
-#[macro_use]
-extern crate alloc;
+//#[macro_use]
+//extern crate alloc;
 
 #[cfg(test)]
 pub const MAX_SUPPLY: u32 = 0xff;
@@ -16,34 +19,52 @@ pub const MAX_SUPPLY: u32 = 0xfff;
 #[contract]
 pub struct Million;
 
+#[cfg(feature = "init")]
 #[contractimpl]
 impl Million {
-    pub fn initialize(env: Env, admin: Address, asset: Address) {
+    pub fn initialize(env: Env, admin: Address, asset: Address, price: i128) {
         let name = String::from_slice(&env, "Pixel");
         let sym = String::from_slice(&env, "PIX");
         MillionDataKey::TokenId.set::<u32>(&env, &0);
         MillionDataKey::AssetAddress.set::<Address>(&env, &asset);
+        MillionDataKey::Price.set::<i128>(&env, &price);
         erc721::ERC721Contract::initialize(env, admin, name, sym);
     }
 
     pub fn upgrade(env: Env, wasm_hash: BytesN<32>) {
         erc721::ERC721Contract::upgrade(env, wasm_hash)
     }
+}
+
+#[cfg(feature = "prod")]
+#[contractimpl]
+impl Million {
+    #[cfg(not(feature = "init"))]
+    pub fn upgrade(env: Env, wasm_hash: BytesN<32>) {
+        erc721::ERC721Contract::upgrade(env, wasm_hash)
+    }
 
     pub fn mint(env: Env, to: Address) -> Result<(), MillionError> {
+        // Check the destination approved the transaction
         to.require_auth();
 
-        token::Client::new(
-            &env,
-            &MillionDataKey::AssetAddress.get::<Address>(&env).unwrap(),
-        )
-        .transfer(&to, &env.current_contract_address(), &2560000000);
+        // Pay the NFT
+        let asset = MillionDataKey::AssetAddress.get::<Address>(&env).unwrap();
+        let price = MillionDataKey::Price.get::<i128>(&env).unwrap();
+        token::Client::new(&env, &asset).transfer(&to, &env.current_contract_address(), &price);
 
+        // Retrieve the token id to mint
         let token_id: u32 = MillionDataKey::TokenId.get(&env).unwrap_or(0);
+
+        // Check if we reached the max supply
         if token_id > MAX_SUPPLY {
             return Err(MillionError::Exhausted);
         }
+
+        // Compute and store the next token id
         MillionDataKey::TokenId.set::<u32>(&env, &(token_id + 1));
+
+        // Mint
         erc721::ERC721Contract::mint(env, to, token_id);
         Ok(())
     }
@@ -101,16 +122,41 @@ impl Million {
     }
 
     pub fn token_uri(env: Env, token_id: u32) -> String {
-        let uri = format!(
-            "https://{:#05x}.millionlumenhomepage.art/.well-known/erc721.json",
-            token_id
-        );
-        String::from_slice(&env, uri.as_str())
+        if token_id < MillionDataKey::TokenId.get(&env).unwrap_or(0) {
+            let mut slice = [0; 62];
+            let d = to_hex(token_id);
+            let mut uri = Bytes::new(&env);
+            uri.extend_from_slice("https://".as_bytes());
+            uri.extend_from_slice(d.as_slice());
+            uri.extend_from_slice(".millionlumenhomepage.art/.well-known/erc721.json".as_bytes());
+            uri.copy_into_slice(&mut slice);
+            let struri = core::str::from_utf8(slice.as_slice()).unwrap();
+            String::from_slice(&env, struri)
+        } else {
+            panic_with_error!(&env, Error::NotNFT);
+        }
     }
 
     pub fn total_supply(env: Env) -> u32 {
         MillionDataKey::TokenId.get(&env).unwrap_or(0)
     }
+}
+fn to_hex(n: u32) -> [u8; 5] {
+    let mut out = [0; 5];
+    out[0] = b'0';
+    out[1] = b'x';
+    for i in (0..3).rev() {
+        let x = ((n >> (i * 4)) & 0xf) as u8;
+        let digit: u8 = match x {
+            x @ 0..=9 => b'0' + x,
+            x @ 10..=15 => b'a' + (x - 10),
+            x => panic!("number not in the range 0..16: {}", x),
+        };
+
+        out[2 - i + 2] = digit;
+    }
+
+    out
 }
 
 #[cfg(test)]

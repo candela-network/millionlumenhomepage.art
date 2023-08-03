@@ -8,9 +8,15 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-soroban-sdk = { workspace = true, features = ["alloc"] }
+soroban-sdk = { workspace = true, features = [] }
 erc721 = { workspace = true, default-features = false, features = ["metadata"] }
 storage = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
+
+
+[features]
+default = ["init", "prod"]
+init = []
+prod = []

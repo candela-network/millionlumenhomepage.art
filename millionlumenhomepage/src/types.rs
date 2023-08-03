@@ -3,6 +3,7 @@ use soroban_sdk::{contracterror, contracttype, Env};
 pub enum MillionDataKey {
     TokenId,
     AssetAddress,
+    Price,
 }
 impl storage::Storage for MillionDataKey {
     fn get<V: soroban_sdk::TryFromVal<Env, soroban_sdk::Val>>(&self, env: &Env) -> Option<V> {
