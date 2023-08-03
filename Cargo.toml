@@ -3,9 +3,9 @@ resolver = "2"
 members = ["storage", "erc721", "millionlumenhomepage"]
 
 [workspace.dependencies]
+erc721 = { path = "./erc721", default-features = false }
 soroban-sdk = { version = "0.9.2", default-features = false }
 storage = { path = "./storage" }
-erc721 = { path = "./erc721" }
 
 [profile.release]
 opt-level = "z"

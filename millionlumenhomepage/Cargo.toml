@@ -9,7 +9,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 soroban-sdk = { workspace = true }
-erc721 = { workspace = true }
+erc721 = { workspace = true, default-features = false, features = ["metadata"] }
+storage = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }

@@ -1,15 +1,13 @@
 #![no_std]
 
-use crate::erc721traits::burnable::ERC721Burnable;
-use crate::erc721traits::enumerable::ERC721Enumerable;
-use crate::erc721traits::erc721::ERC721;
-use crate::erc721traits::metadata::ERC721Metadata;
-use crate::types::*;
+pub use crate::erc721traits::burnable::ERC721Burnable;
+pub use crate::erc721traits::enumerable::ERC721Enumerable;
+pub use crate::erc721traits::erc721::ERC721;
+pub use crate::erc721traits::metadata::ERC721Metadata;
+pub use crate::types::*;
 use storage::Storage;
 
-use soroban_sdk::{
-    contract, contractimpl, contracttype, panic_with_error, Address, BytesN, Env, Map, String, Vec,
-};
+use soroban_sdk::{contracttype, panic_with_error, Address, BytesN, Env, Map, String, Vec};
 
 mod erc721traits;
 mod types;
@@ -17,10 +15,10 @@ mod types;
 #[cfg(test)]
 mod tests;
 
-#[contract]
+#[cfg_attr(test, soroban_sdk::contract)]
 pub struct ERC721Contract;
 
-#[contractimpl]
+#[cfg_attr(test, soroban_sdk::contractimpl)]
 impl ERC721 for ERC721Contract {
     fn balance_of(env: Env, owner: Address) -> u32 {
         DataKey::Balance(owner).get(&env).unwrap_or(0)
@@ -155,7 +153,7 @@ impl ERC721 for ERC721Contract {
 }
 
 #[cfg(feature = "metadata")]
-#[contractimpl]
+#[cfg_attr(test, soroban_sdk::contractimpl)]
 impl ERC721Metadata for ERC721Contract {
     fn name(env: Env) -> String {
         DatakeyMetadata::Name.get(&env).unwrap()
@@ -169,7 +167,7 @@ impl ERC721Metadata for ERC721Contract {
 }
 
 #[cfg(feature = "enumerable")]
-#[contractimpl]
+#[cfg_attr(test, soroban_sdk::contractimpl)]
 impl ERC721Enumerable for ERC721Contract {
     fn total_supply(env: Env) -> u32 {
         DataKeyEnumerable::IndexToken
@@ -194,7 +192,7 @@ impl ERC721Enumerable for ERC721Contract {
 }
 
 #[cfg(feature = "burnable")]
-#[contractimpl]
+#[cfg_attr(test, soroban_sdk::contractimpl)]
 impl ERC721Burnable for ERC721Contract {
     fn burn(env: Env, caller: Address, token_id: u32) {
         let owner: Address = DataKey::TokenOwner(token_id)
@@ -245,9 +243,32 @@ impl ERC721Burnable for ERC721Contract {
     }
 }
 #[contracttype]
-pub struct ADMIN();
+pub enum Admin {
+    User,
+}
+impl storage::Storage for Admin {
+    fn get<V: soroban_sdk::TryFromVal<Env, soroban_sdk::Val>>(&self, env: &Env) -> Option<V> {
+        storage::Persistent::get(env, self)
+    }
 
-#[contractimpl]
+    fn set<V: soroban_sdk::IntoVal<Env, soroban_sdk::Val>>(&self, env: &Env, val: &V) {
+        storage::Persistent::set(env, self, val)
+    }
+
+    fn has(&self, env: &Env) -> bool {
+        storage::Persistent::has(env, self)
+    }
+
+    fn bump(&self, env: &Env, expiration_ledger: u32) {
+        storage::Persistent::bump(env, self, expiration_ledger)
+    }
+
+    fn remove(&self, env: &Env) {
+        storage::Persistent::remove(env, self)
+    }
+}
+
+#[cfg_attr(test, soroban_sdk::contractimpl)]
 impl ERC721Contract {
     pub fn initialize(
         env: Env,
@@ -255,10 +276,12 @@ impl ERC721Contract {
         #[cfg(feature = "metadata")] name: String,
         #[cfg(feature = "metadata")] symbol: String,
     ) {
-        if env.storage().instance().has(&ADMIN()) {
+        if Admin::User.has(&env) {
             panic!("Already initialized")
         }
-        env.storage().instance().set(&ADMIN(), &admin);
+        Admin::User.set(&env, &admin);
+
+        env.storage().instance().bump(10000);
         if cfg!(feature = "metadata") {
             env.storage().instance().set(&DatakeyMetadata::Name, &name);
             env.storage()
@@ -320,8 +343,9 @@ impl ERC721Contract {
 }
 
 fn get_admin(env: &Env) -> Address {
-    env.storage()
-        .instance()
-        .get(&ADMIN())
-        .unwrap_or_else(|| panic!("Not initialized"))
+    if let Some(addr) = Admin::User.get(env) {
+        addr
+    } else {
+        panic_with_error!(env, Error::NotAuthorized)
+    }
 }
