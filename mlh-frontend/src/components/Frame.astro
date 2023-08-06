@@ -1,0 +1,38 @@
+---
+interface Props {
+  src: string;	
+  height: string;
+  width: string;
+}
+
+const { src, height, width } = Astro.props;
+---
+<div class="frame">
+  <image src={src} height={height} width={width} />
+</div>
+
+<style>
+img {
+  border-bottom-color: #ffe;
+  border-left-color: #eed;
+  border-right-color: #eed;
+  border-top-color: #ccb;
+  max-height: 100%;
+  max-width: 100%;
+  margin-bottom: -3px;
+}
+
+.frame {
+  background-color: #ddc;
+  border: solid 2vmin #eee;
+  border-bottom-color: #fff;
+  border-left-color: #eee;
+  border-radius: 2px;
+  border-right-color: #eee;
+  border-top-color: #ddd;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset, 0 5px 10px 5px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  display: block;
+ 
+}
+</style>

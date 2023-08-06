@@ -7,8 +7,6 @@ use soroban_sdk::{
 use storage::Storage;
 mod types;
 use crate::types::*;
-//#[macro_use]
-//extern crate alloc;
 
 #[cfg(test)]
 pub const MAX_SUPPLY: u32 = 0xff;
@@ -25,7 +23,9 @@ impl Million {
     pub fn initialize(env: Env, admin: Address, asset: Address, price: i128) {
         let name = String::from_slice(&env, "Pixel");
         let sym = String::from_slice(&env, "PIX");
-        MillionDataKey::TokenId.set::<u32>(&env, &0);
+        MillionDataKey::TokenId
+            .bump(&env, 10_000)
+            .set::<u32>(&env, &0);
         MillionDataKey::AssetAddress.set::<Address>(&env, &asset);
         MillionDataKey::Price.set::<i128>(&env, &price);
         erc721::ERC721Contract::initialize(env, admin, name, sym);
@@ -63,7 +63,6 @@ impl Million {
 
         // Compute and store the next token id
         MillionDataKey::TokenId.set::<u32>(&env, &(token_id + 1));
-
         // Mint
         erc721::ERC721Contract::mint(env, to, token_id);
         Ok(())

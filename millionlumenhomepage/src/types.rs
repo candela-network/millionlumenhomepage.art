@@ -18,8 +18,9 @@ impl storage::Storage for MillionDataKey {
         storage::Instance::has(env, self)
     }
 
-    fn bump(&self, env: &Env, expiration_ledger: u32) {
-        storage::Instance::bump(env, expiration_ledger)
+    fn bump(&self, env: &Env, expiration_ledger: u32) -> &Self {
+        storage::Instance::bump(env, expiration_ledger);
+        self
     }
 
     fn remove(&self, env: &Env) {

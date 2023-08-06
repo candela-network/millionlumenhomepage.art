@@ -1,0 +1,100 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Card from '../components/Card.astro';
+import Frame from '../components/Frame.astro';
+
+---
+
+<Layout title="Welcome to Astro.">
+	<main>
+    <Frame src="https://art.ngfiles.com/images/3237000/3237261_tbadriel_sea-view.png?f1685553647"  id="frame" />
+    <div class="title">
+      <b><em>million lumen homepage</em></b><br />
+      <b>Stellar Community</b><br />
+      <small>Pixel art - 4096 NFTs of 256px</small>
+    </div>
+    <p class="slide">
+      Community driven
+    </p>
+    <p class="slide">
+      <b>1&nbsp;048&nbsp;576</b> pixels
+    </p>
+    <p class="slide">
+      <b>4096</b> NFTs
+    </p>
+    <p class="slide">
+      <b>Soroban</b> ERC721
+    </p>
+	</main>
+</Layout>
+<script>
+
+function slide(i: number)  {
+  let slides = document.getElementsByClassName("slide");
+  let length = slides.length;
+  for (let n=0; n < slides.length; n++) {
+    slides[n].style.visibility = "hidden";
+    //slides[n].style.display = "none";
+    slides[n].style.opacity = 0;
+    slides[n].style.height = 0;
+  }
+  slides[i % length].style.visibility = "visible";
+  //slides[i % 3].style.display = "block";
+  slides[i % length].style.opacity = 1;
+  slides[i % length].style.height = "2em";
+  slides[i % length].style["text-align"] = i % 2 == 0 ? "right":"left";
+
+
+  i += 1;
+  setTimeout(slide, 5000, i);
+}
+slide(0)
+</script>
+<style>
+	main {
+		padding: 2rem;
+		color: black;
+		font-size: 20px;
+		line-height: 1.6;
+    margin-left: auto;
+    margin-right: auto;
+	}
+  .title {
+    background-color: black;
+    color: white;
+    padding: 1em;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset, 0 5px 10px 5px rgba(0, 0, 0, 0.25);
+    position: relative;
+    top: 1.5em;
+    width: fit-content;
+    margin: auto;
+    font-size: 1rem;
+  }
+  p {
+    display: block;
+    width: 80vw;
+    margin: auto;
+  }
+  .slide {
+    font-size: 2rem;
+    visibility: hidden;
+    transition: visibility 0s, opacity 1s ease-in-out;
+    width: "fit-content";
+    position: relative;
+    top: 1rem;
+  }
+	h1 {
+		font-size: 4rem;
+		font-weight: 700;
+		line-height: 1;
+		text-align: center;
+		margin-bottom: 1em;
+	}
+	.text-gradient {
+		background-image: var(--accent-gradient);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-size: 400%;
+		background-position: 0%;
+	}
+</style>

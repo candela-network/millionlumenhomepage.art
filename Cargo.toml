@@ -3,8 +3,8 @@ resolver = "2"
 members = ["storage", "erc721", "millionlumenhomepage"]
 
 [workspace.dependencies]
+soroban-sdk = { git = "https://github.com/stellar/rs-soroban-sdk.git", rev = "5943aa66baf85ebb70d946c37e297abc80d13a78", default-features = false }
 erc721 = { path = "./erc721", default-features = false }
-soroban-sdk = { version = "0.9.2", default-features = false }
 storage = { path = "./storage" }
 
 [profile.release]

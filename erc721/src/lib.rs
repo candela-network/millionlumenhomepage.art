@@ -7,7 +7,7 @@ pub use crate::erc721traits::metadata::ERC721Metadata;
 pub use crate::types::*;
 use storage::Storage;
 
-use soroban_sdk::{contracttype, panic_with_error, Address, BytesN, Env, Map, String, Vec};
+use soroban_sdk::{panic_with_error, Address, BytesN, Env, Map, String, Vec};
 
 mod erc721traits;
 mod types;
@@ -242,31 +242,6 @@ impl ERC721Burnable for ERC721Contract {
             let balance = balance_key.get(&env).unwrap_or(0);
             balance_key.set(&env, &(balance - 1));
         }
-    }
-}
-#[contracttype]
-pub enum Admin {
-    User,
-}
-impl storage::Storage for Admin {
-    fn get<V: soroban_sdk::TryFromVal<Env, soroban_sdk::Val>>(&self, env: &Env) -> Option<V> {
-        storage::Persistent::get(env, self)
-    }
-
-    fn set<V: soroban_sdk::IntoVal<Env, soroban_sdk::Val>>(&self, env: &Env, val: &V) {
-        storage::Persistent::set(env, self, val)
-    }
-
-    fn has(&self, env: &Env) -> bool {
-        storage::Persistent::has(env, self)
-    }
-
-    fn bump(&self, env: &Env, expiration_ledger: u32) {
-        storage::Persistent::bump(env, self, expiration_ledger)
-    }
-
-    fn remove(&self, env: &Env) {
-        storage::Persistent::remove(env, self)
     }
 }
 

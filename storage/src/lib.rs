@@ -5,7 +5,7 @@ pub trait Storage {
     fn get<V: TryFromVal<Env, Val>>(&self, env: &Env) -> Option<V>;
     fn set<V: IntoVal<Env, Val>>(&self, env: &Env, val: &V);
     fn has(&self, env: &Env) -> bool;
-    fn bump(&self, env: &Env, expiration_ledger: u32);
+    fn bump(&self, env: &Env, expiration_ledger: u32) -> &Self;
     fn remove(&self, env: &Env);
 }
 
