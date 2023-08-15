@@ -18,8 +18,12 @@ impl storage::Storage for MillionDataKey {
         storage::Instance::has(env, self)
     }
 
-    fn bump(&self, env: &Env, expiration_ledger: u32) -> &Self {
-        storage::Instance::bump(env, expiration_ledger);
+    fn bump(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
+        storage::Instance::bump(env, min_ledger_to_live);
+        self
+    }
+    fn bump_until(&self, env: &Env, expiration_ledger: u32) -> &Self {
+        storage::Instance::bump_until(env, expiration_ledger);
         self
     }
 

@@ -21,7 +21,10 @@ pub struct ERC721Contract;
 #[cfg_attr(test, soroban_sdk::contractimpl)]
 impl ERC721 for ERC721Contract {
     fn balance_of(env: Env, owner: Address) -> u32 {
-        DataKey::Balance(owner).get(&env).unwrap_or(0)
+        DataKey::Balance(owner)
+            .bump(&env, 1000)
+            .get(&env)
+            .unwrap_or(0)
     }
 
     fn transfer_from(env: Env, spender: Address, from: Address, to: Address, token_id: u32) {
@@ -111,7 +114,7 @@ impl ERC721 for ERC721Contract {
         }
         if let Some(to_approve) = operator {
             DataKey::Approved(token_id).set(&env, &to_approve);
-            DataKey::Approved(token_id).bump(&env, expiration_ledger);
+            DataKey::Approved(token_id).bump_until(&env, expiration_ledger);
         } else {
             DataKey::Approved(token_id).remove(&env);
         }
@@ -137,7 +140,7 @@ impl ERC721 for ERC721Contract {
         let key = DataKey::Operator(owner, operator);
         if approved {
             key.set(&env, &true);
-            key.bump(&env, expiration_ledger);
+            key.bump_until(&env, expiration_ledger);
         } else {
             key.remove(&env);
         }

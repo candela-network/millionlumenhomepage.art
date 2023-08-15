@@ -137,7 +137,10 @@ impl Million {
     }
 
     pub fn total_supply(env: Env) -> u32 {
-        MillionDataKey::TokenId.get(&env).unwrap_or(0)
+        MillionDataKey::TokenId
+            .bump(&env, 1000)
+            .get(&env)
+            .unwrap_or(0)
     }
 }
 fn to_hex(n: u32) -> [u8; 5] {

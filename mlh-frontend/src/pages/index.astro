@@ -11,8 +11,9 @@ import Frame from '../components/Frame.astro';
     <div class="title">
       <b><em>million lumen homepage</em></b><br />
       <b>Stellar Community</b><br />
-      <small>Pixel art - 4096 NFTs of 256px</small>
+      <small>Pixel art - 4096 NFTs of 256px - futurenet</small>
     </div>
+    <!--
     <p class="slide">
       Community driven
     </p>
@@ -25,6 +26,20 @@ import Frame from '../components/Frame.astro';
     <p class="slide">
       <b>Soroban</b> ERC721
     </p>
+-->
+      <div style="text-align: center; font-size: 4rem;position: absolute; top: 90vh;right: 50vw;width: 1rem;color: #eee;">⇣<!--↯--></div>
+    <div class="description">
+      <h1>
+      Explore the new capabilites of stellar with the soroban smart contract platform
+      </h1>
+      <div style="width: fit-content; margin: auto; font-size: 2rem;">
+        <p>Install freighter</p>
+        <p>&nbsp;↳Create an account</p>
+        <p>&nbsp;&nbsp;↳Switch to <b>futurenet</b></p>
+      </div>
+      <p><button class="get-nft">Get your NFT</button></p>
+      <h2>Each NFT gives you access to your own page to build new NFTs</h2>
+    </div>
 	</main>
 </Layout>
 <script>
@@ -34,21 +49,22 @@ function slide(i: number)  {
   let length = slides.length;
   for (let n=0; n < slides.length; n++) {
     slides[n].style.visibility = "hidden";
-    //slides[n].style.display = "none";
     slides[n].style.opacity = 0;
-    slides[n].style.height = 0;
+    slides[n].style.position = "absolute";
+    slides[n].style.top = 0;
   }
+  slides[i % length].style.position = "relative";
+  slides[i % length].style.top = "1rem";
   slides[i % length].style.visibility = "visible";
-  //slides[i % 3].style.display = "block";
   slides[i % length].style.opacity = 1;
-  slides[i % length].style.height = "2em";
+
   slides[i % length].style["text-align"] = i % 2 == 0 ? "right":"left";
 
 
   i += 1;
   setTimeout(slide, 5000, i);
 }
-slide(0)
+//slide(0)
 </script>
 <style>
 	main {
@@ -70,10 +86,24 @@ slide(0)
     margin: auto;
     font-size: 1rem;
   }
-  p {
+  .description  {
+    position: absolute;
+    top: 99vh;
+  }
+  .get-nft {
+    font-size: 2rem;
+    border-radius: 1rem;
+    border: 1px solid black;
+    padding: 1rem;
+    text-align: center;
     display: block;
-    width: 80vw;
+    width: fit-content;
     margin: auto;
+    margin-top: 2rem;
+    color: white;
+    background-color: black;
+    cursor: pointer;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset, 0 5px 10px 5px rgba(0, 0, 0, 0.25);
   }
   .slide {
     font-size: 2rem;
@@ -85,6 +115,13 @@ slide(0)
   }
 	h1 {
 		font-size: 4rem;
+		font-weight: 700;
+		line-height: 1;
+		text-align: center;
+		margin-bottom: 1em;
+	}
+	h2 {
+		font-size: 3rem;
 		font-weight: 700;
 		line-height: 1;
 		text-align: center;
