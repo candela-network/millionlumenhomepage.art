@@ -106,7 +106,7 @@ fn mint_all() {
         Err(Err(_)) => {
             // Ok
         }
-        _ => assert!(false, "Expect an error"),
+        _ => panic!("Expect an error"),
     }
     //assert_eq!(result, Err(Ok(MillionError::Exhausted)));
 }

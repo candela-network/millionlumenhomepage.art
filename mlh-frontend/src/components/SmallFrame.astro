@@ -1,14 +1,14 @@
 ---
 interface Props {
-  src: string;	
+  src: string;
   height: string;
   width: string;
 }
 
-const { src, height, width } = Astro.props;
+const { src } = Astro.props;
 ---
-<div class="frame">
-  <image src={src} height={height} width={width} />
+<div class="smallframe">
+  <image src={src} />
 </div>
 
 <style>
@@ -23,7 +23,7 @@ img {
   image-rendering: pixelated;
 }
 
-.frame {
+.smallframe {
   background-color: #ddc;
   border: solid 2vmin #eee;
   border-bottom-color: #fff;
@@ -34,5 +34,7 @@ img {
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset, 0 5px 10px 5px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
   display: block;
+  width: 20vw;
+  height: 20vw;
 }
 </style>

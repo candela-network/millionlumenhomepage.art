@@ -1,9 +1,46 @@
 ---
-
+import Layout from '../../layouts/Layout.astro';
+import SmallFrame from '../../components/SmallFrame.astro';
+import * as million from 'Million';
+import * as soroban from 'soroban-client';
 // 1. Check the id is below the supply
 // 2. If not logged in or not the owner, display the pixel and the gallery
 // 2. if owner, the pixel is editable, you can set the price on the items in the gallery 
 //
 // 
----
+const FakeWallet = { isConnected: function()  { return false },};
+const { id } = Astro.params;
 
+// Do not access if does not start with 0x
+if (!id.startsWith("0x")) {
+  return Astro.redirect("/404");
+}
+let num = parseInt(id.substring(2), 16);
+let total = await million.totalSupply({wallet: FakeWallet});
+
+// Do not display if not minted
+if (num >= total) {
+  return Astro.redirect("/404");
+}
+
+const owner = await million.ownerOf({token_id: num}, {wallet: FakeWallet});
+console.log(owner)
+
+
+ ---
+<Layout title={id}>
+	<main>
+    <div class="homepage"><a href="/">← million lumen homepage</a></div>
+    <h1>{id}</h1>
+    <SmallFrame   />
+  </main>
+</Layout>
+<style>
+.homepage {
+  font-weight: bold;
+}
+a, a:visited {
+  text-decoration: none;
+  color: black;
+}
+</style>

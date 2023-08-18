@@ -143,6 +143,12 @@ impl Million {
             .get(&env)
             .unwrap_or(0)
     }
+
+    pub fn owner_of(env: Env, token_id: u32) -> Address {
+        erc721::DataKey::TokenOwner(token_id)
+            .get(&env)
+            .unwrap_or_else(|| panic!("token_id does not exist"))
+    }
 }
 fn to_hex(n: u32) -> [u8; 5] {
     let mut out = [0; 5];
