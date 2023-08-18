@@ -2,10 +2,25 @@
 import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
 import Frame from '../components/Frame.astro';
+import Mint from '../components/Mint.astro';
+import * as million from 'Million';
+
+  const FakeWallet = {
+    isConnected: function()  { return false },
+  }
+  console.log("Calling total_supply");
+  let total = await million.totalSupply({wallet: FakeWallet});
+  let uris = []
+  for (let i=0; i < total; i++) {
+    let data = await million.tokenUri({token_id: i}, {wallet: FakeWallet});
+    uris.push(data);
+  }
+  console.log(total);
+
 
 ---
 
-<Layout title="Welcome to Astro.">
+<Layout title="million lumen homepage">
 	<main>
     <Frame src="https://art.ngfiles.com/images/3237000/3237261_tbadriel_sea-view.png?f1685553647"  id="frame" />
     <div class="title">
@@ -33,16 +48,19 @@ import Frame from '../components/Frame.astro';
       Explore the new capabilites of stellar with the soroban smart contract platform
       </h1>
       <div style="width: fit-content; margin: auto; font-size: 2rem;">
-        <p>Install freighter</p>
+        <p>Install <a href="https://www.freighter.app/" target="_blank">freighter</a></p>
         <p>&nbsp;↳Create an account</p>
         <p>&nbsp;&nbsp;↳Switch to <b>futurenet</b></p>
       </div>
-      <p><button class="get-nft">Get your NFT</button></p>
+      <Mint />
       <h2>Each NFT gives you access to your own page to build new NFTs</h2>
     </div>
 	</main>
 </Layout>
 <script>
+
+//let data = await fetch("/supply");
+//console.log(data)
 
 function slide(i: number)  {
   let slides = document.getElementsByClassName("slide");
@@ -88,23 +106,9 @@ function slide(i: number)  {
   }
   .description  {
     position: absolute;
-    top: 99vh;
+    top: 100vh;
   }
-  .get-nft {
-    font-size: 2rem;
-    border-radius: 1rem;
-    border: 1px solid black;
-    padding: 1rem;
-    text-align: center;
-    display: block;
-    width: fit-content;
-    margin: auto;
-    margin-top: 2rem;
-    color: white;
-    background-color: black;
-    cursor: pointer;
-    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset, 0 5px 10px 5px rgba(0, 0, 0, 0.25);
-  }
+ 
   .slide {
     font-size: 2rem;
     visibility: hidden;

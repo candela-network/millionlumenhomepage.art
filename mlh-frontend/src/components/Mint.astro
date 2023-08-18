@@ -1,0 +1,57 @@
+
+<div id="freighter-wrap" aria-live="polite">
+  <button data-connect aria-controls="freighter-wrap">Mint</button>
+</div>
+<style>
+  div {
+    line-height: 2.7rem;
+    margin: auto;
+    max-width: 12rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    white-space: nowrap;
+  }
+button {
+    font-size: 2rem;
+    border-radius: 1rem;
+    border: 1px solid black;
+    padding: 1rem;
+    text-align: center;
+    display: block;
+    width: fit-content;
+    margin: auto;
+    margin-top: 2rem;
+    color: white;
+    background-color: black;
+    cursor: pointer;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset, 0 5px 10px 5px rgba(0, 0, 0, 0.25);
+  }
+</style>
+<script>
+  import * as client from 'Million';
+   import * as wallet from '@stellar/freighter-api';
+  import {xdr} from 'soroban-client';
+  const wrap = document.querySelector('#freighter-wrap');
+  const button = document.querySelector('[data-connect]');
+    button.addEventListener('click', async () => {
+      if (!(await wallet.isAllowed())) {
+       await wallet.setAllowed();
+      }
+      const { publicKey } = await wallet.getUserInfo();
+      let result = await client.mint({to: publicKey}, {fee: 300000, responseType: "full", wallet: wallet});
+      if (result.status == "SUCCESS") {
+        let rvalue = xdr.TransactionMeta.fromXDR(result.resultMetaXdr, 'base64').v3().sorobanMeta().returnValue().u32();
+        let result2 = await client.tokenUri({token_id: rvalue}, {responseType: "simulated", fee: 100000, wallet: wallet});
+        console.log(result2)
+        if (result2.results[0].xdr) {
+          let xdrUri = result2.results[0].xdr;
+          let uri = xdr.ScVal.fromXDR(xdrUri, 'base64').str().toString()
+          console.log(uri)
+        }
+        console.log("r=" + rvalue)
+        //let token_uri = await client.tokenUri({token_id: 0}, {})
+      }
+      //console.log(result);
+    });
+</script>

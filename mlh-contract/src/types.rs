@@ -1,4 +1,4 @@
-use soroban_sdk::{contracterror, contracttype, Env};
+use soroban_sdk::{contracttype, Env};
 #[contracttype]
 pub enum MillionDataKey {
     TokenId,
@@ -31,9 +31,10 @@ impl storage::Storage for MillionDataKey {
         storage::Instance::remove(env, self)
     }
 }
-
+/*
 #[contracterror]
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MillionError {
     Exhausted = 1,
 }
+*/

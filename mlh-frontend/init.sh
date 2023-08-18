@@ -1,8 +1,12 @@
 soroban config identity generate admin
 curl "http://localhost:8000/friendbot?addr=$(soroban config identity address admin)" 2>&1 >/dev/null
 soroban lab token wrap --asset native --network standalone --source admin &
+
+CURRENT_DIR=$(pwd)
+cd ../mlh-contract/
 echo building contract
 RUSTFLAGS="-C target-cpu=mvp" cargo +nightly build --target wasm32-unknown-unknown --release -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort
+cd $CURRENT_DIR
 #RUSTFLAGS="-C target-cpu=mvp" cargo +nightly build --target wasm32-unknown-unknown --release -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --no-default-features --features init
 #soroban contract build --no-default-features --features init
 #RUSTFLAGS="-C target-feature=-sign-ext" cargo +nightly build --target wasm32-unknown-unknown --release
@@ -11,9 +15,10 @@ RUSTFLAGS="-C target-cpu=mvp" cargo +nightly build --target wasm32-unknown-unkno
 echo deploying contract
 CONTRACT_ID=$(soroban contract deploy --wasm ../target/wasm32-unknown-unknown/release/mlh_contract.wasm --source admin --network standalone)
 
-echo $CONTRACT_ID >contract.id
 echo initializing contract $CONTRACT_ID
 soroban contract invoke --id $CONTRACT_ID --source admin --network standalone -- initialize --admin $(soroban config identity address admin) --asset $(soroban lab token id --asset native --network standalone) --price 2560000000
+
+echo $CONTRACT_ID >./contract.id
 
 #echo building contract for prod
 #RUSTFLAGS="-C target-cpu=mvp" cargo +nightly build --target wasm32-unknown-unknown --release -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --no-default-features --features prod

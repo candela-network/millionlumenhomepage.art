@@ -44,7 +44,7 @@ impl Million {
         erc721::ERC721Contract::upgrade(env, wasm_hash)
     }
 
-    pub fn mint(env: Env, to: Address) -> Result<(), MillionError> {
+    pub fn mint(env: Env, to: Address) -> Result<u32, Error> {
         // Check the destination approved the transaction
         to.require_auth();
 
@@ -58,14 +58,15 @@ impl Million {
 
         // Check if we reached the max supply
         if token_id > MAX_SUPPLY {
-            return Err(MillionError::Exhausted);
+            //return Err(MillionError::Exhausted);
+            panic!("Exhausted")
         }
 
         // Compute and store the next token id
         MillionDataKey::TokenId.set::<u32>(&env, &(token_id + 1));
         // Mint
         erc721::ERC721Contract::mint(env, to, token_id);
-        Ok(())
+        Ok(token_id)
     }
 
     pub fn balance_of(env: Env, owner: Address) -> u32 {
@@ -122,10 +123,10 @@ impl Million {
 
     pub fn token_uri(env: Env, token_id: u32) -> String {
         if token_id < MillionDataKey::TokenId.get(&env).unwrap_or(0) {
-            let mut slice = [0; 62];
+            let mut slice = [0; 67];
             let d = to_hex(token_id);
             let mut uri = Bytes::new(&env);
-            uri.extend_from_slice("https://".as_bytes());
+            uri.extend_from_slice("https://test-".as_bytes());
             uri.extend_from_slice(d.as_slice());
             uri.extend_from_slice(".millionlumenhomepage.art/.well-known/erc721.json".as_bytes());
             uri.copy_into_slice(&mut slice);
@@ -160,6 +161,5 @@ fn to_hex(n: u32) -> [u8; 5] {
 
     out
 }
-
 #[cfg(test)]
 mod test;
