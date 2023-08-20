@@ -8,12 +8,12 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "postinstall": "./init.sh && soroban contract bindings typescript --wasm ../target/wasm32-unknown-unknown/release/mlh_contract.wasm --network standalone --contract-id $(cat ./contract.id) --contract-name Million --output-dir node_modules/Million"
+    "postinstall": "soroban contract bindings typescript --wasm ../target/wasm32-unknown-unknown/release/mlh_contract.wasm --network standalone --contract-id $(cat ./contract.id) --contract-name Million --output-dir node_modules/Million"
   },
   "dependencies": {
     "@astrojs/node": "^5.3.4",
     "@stellar/freighter-api": "^1.6.0",
     "astro": "^2.10.1",
-    "soroban-client": "^0.10.1"
+    "stellar-base": "^10.0.0-soroban.7"
   }
 }

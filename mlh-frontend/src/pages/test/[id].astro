@@ -2,7 +2,6 @@
 import Layout from '../../layouts/Layout.astro';
 import SmallFrame from '../../components/SmallFrame.astro';
 import * as million from 'Million';
-import * as soroban from 'soroban-client';
 // 1. Check the id is below the supply
 // 2. If not logged in or not the owner, display the pixel and the gallery
 // 2. if owner, the pixel is editable, you can set the price on the items in the gallery 
@@ -15,6 +14,8 @@ const { id } = Astro.params;
 if (!id.startsWith("0x")) {
   return Astro.redirect("/404");
 }
+
+console.log(million.CONTRACT_ID)
 let num = parseInt(id.substring(2), 16);
 let total = await million.totalSupply({wallet: FakeWallet});
 

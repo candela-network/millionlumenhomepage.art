@@ -6,7 +6,6 @@
   div {
     line-height: 2.7rem;
     margin: auto;
-    max-width: 12rem;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
@@ -19,27 +18,38 @@ button {
     padding: 1rem;
     text-align: center;
     display: block;
-    width: fit-content;
+    width: 5ch;
     margin: auto;
     margin-top: 2rem;
     color: white;
     background-color: black;
     cursor: pointer;
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset, 0 5px 10px 5px rgba(0, 0, 0, 0.25);
+
+    transition: width 0.2s linear;
   }
 </style>
 <script>
   import * as client from 'Million';
    import * as wallet from '@stellar/freighter-api';
-  import {xdr} from 'soroban-client';
+  import {xdr} from 'stellar-base';
   const wrap = document.querySelector('#freighter-wrap');
   const button = document.querySelector('[data-connect]');
-    button.addEventListener('click', async () => {
+  button.addEventListener('click', async () => {
+    console.log("check allowed")
       if (!(await wallet.isAllowed())) {
        await wallet.setAllowed();
       }
+    console.log("get pubkey")
       const { publicKey } = await wallet.getUserInfo();
-      let result = await client.mint({to: publicKey}, {fee: 300000, responseType: "full", wallet: wallet});
+    console.log("mint")
+    console.log(client.CONTRACT_ID)
+      let rnum = Math.floor(Math.random() * 4096);
+      let x = Math.floor(rnum % 2048);
+      let y = Math.floor(rnum / 512);
+      console.log(x);
+      console.log(y)
+      let result = await client.mint({to: publicKey, x: x, y: y}, {fee: 500000, responseType: "full", wallet: wallet});
       if (result.status == "SUCCESS") {
         let rvalue = xdr.TransactionMeta.fromXDR(result.resultMetaXdr, 'base64').v3().sorobanMeta().returnValue().u32();
         let result2 = await client.tokenUri({token_id: rvalue}, {responseType: "simulated", fee: 100000, wallet: wallet});
@@ -53,5 +63,13 @@ button {
         //let token_uri = await client.tokenUri({token_id: 0}, {})
       }
       //console.log(result);
-    });
+  });
+  button.addEventListener('mouseenter', async () =>  {
+    button.style.width = "20ch";
+    button.innerHTML = '256XLM ⇋ 256px';
+  })
+  button.addEventListener('mouseleave', async () =>  {
+    button.innerHTML = 'Mint';
+    button.style.width = "5ch";
+  })
 </script>

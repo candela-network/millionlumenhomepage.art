@@ -42,7 +42,7 @@ fn mint() {
     asset_client_admin
         .mock_all_auths()
         .mint(&user1, &2_560_000_000);
-    client.mock_all_auths().mint(&user1);
+    client.mock_all_auths().mint(&0, &1, &user1);
     let auths = env.auths();
     for a in auths.into_iter() {
         std::println!("{:?}", a.1);
@@ -53,7 +53,7 @@ fn mint() {
     asset_client_admin
         .mock_all_auths()
         .mint(&user2, &2_560_000_000);
-    let _ = client.mock_all_auths().try_mint(&user2);
+    let _ = client.mock_all_auths().try_mint(&0, &0, &user2);
 
     assert_eq!(client.balance_of(&user1), 1);
     assert_eq!(client.balance_of(&user2), 1);
@@ -86,12 +86,21 @@ fn mint_all() {
     client.initialize(&admin, &native_addr, &2_560_000_000);
 
     env.budget().reset_unlimited();
-    for _ in 0..max {
+    for i in 0..max {
         let user1 = Address::random(&env);
         asset_client_admin
             .mock_all_auths()
             .mint(&user1, &2_560_000_000);
-        let _ = client.mock_all_auths().try_mint(&user1);
+        let x = i % (MAX_XY.0 + 1);
+        let y = i / (MAX_XY.0 + 1);
+        println!("x: {x}, y: {y}");
+        let r = client.mock_all_auths().try_mint(&x, &y, &user1);
+        match r {
+            Ok(Ok(_)) => {}
+            _ => {
+                panic!("FAIL");
+            }
+        }
     }
 
     assert_eq!(client.total_supply(), max);
@@ -99,7 +108,7 @@ fn mint_all() {
     asset_client_admin
         .mock_all_auths()
         .mint(&user1, &2_560_000_000);
-    let result = client.mock_all_auths().try_mint(&user1);
+    let result = client.mock_all_auths().try_mint(&0, &0, &user1);
 
     //println!("{:?}", result);
     match result {

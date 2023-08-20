@@ -10,9 +10,13 @@ use crate::types::*;
 
 #[cfg(test)]
 pub const MAX_SUPPLY: u32 = 0xff;
+#[cfg(test)]
+pub const MAX_XY: (u32, u32) = (0x1f, 0x7f);
 
 #[cfg(not(test))]
 pub const MAX_SUPPLY: u32 = 0xfff;
+#[cfg(not(test))]
+pub const MAX_XY: (u32, u32) = (0x7ff, 0x1ff);
 
 #[contract]
 pub struct Million;
@@ -44,9 +48,19 @@ impl Million {
         erc721::ERC721Contract::upgrade(env, wasm_hash)
     }
 
-    pub fn mint(env: Env, to: Address) -> Result<u32, Error> {
+    pub fn mint(env: Env, x: u32, y: u32, to: Address) -> Result<u32, Error> {
         // Check the destination approved the transaction
         to.require_auth();
+
+        // Check the coordinates are free
+        if Coords::Token(x, y).has(&env) {
+            panic!("Coordinates already used");
+        }
+
+        // Check out of bound
+        if x > MAX_XY.0 || y > MAX_XY.1 {
+            panic!("X or Y too big")
+        }
 
         // Pay the NFT
         let asset = MillionDataKey::AssetAddress.get::<Address>(&env).unwrap();
@@ -64,6 +78,9 @@ impl Million {
 
         // Compute and store the next token id
         MillionDataKey::TokenId.set::<u32>(&env, &(token_id + 1));
+        Coords::Token(x, y).set(&env, &token_id);
+        Coords::Xy(token_id).set(&env, &(x, y));
+
         // Mint
         erc721::ERC721Contract::mint(env, to, token_id);
         Ok(token_id)

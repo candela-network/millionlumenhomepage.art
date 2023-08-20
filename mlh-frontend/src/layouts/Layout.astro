@@ -27,9 +27,13 @@ const { title } = Astro.props;
 		--accent-dark: 49, 10, 101;
 		--accent-gradient: linear-gradient(45deg, rgb(var(--accent)), rgb(var(--accent-light)) 30%, white 60%);
 	}
-	html {
+	html, body {
 		font-family:  sans-serif;
-		background: #cde;
+		background: #ff;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-width: fit-content;
 	}
 	code {
 		font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
