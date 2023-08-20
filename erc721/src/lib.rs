@@ -7,7 +7,7 @@ pub use crate::erc721traits::metadata::ERC721Metadata;
 pub use crate::types::*;
 use storage::Storage;
 
-use soroban_sdk::{panic_with_error, Address, BytesN, Env, Map, String, Vec};
+use soroban_sdk::{panic_with_error, Address, BytesN, Env, IntoVal, Map, String, Val, Vec};
 
 mod erc721traits;
 mod types;
@@ -245,6 +245,8 @@ impl ERC721Burnable for ERC721Contract {
             let balance = balance_key.get(&env).unwrap_or(0);
             balance_key.set(&env, &(balance - 1));
         }
+        let v: Val = token_id.into();
+        Event::Burn.publish(&env, v);
     }
 }
 
@@ -311,13 +313,17 @@ impl ERC721Contract {
                 DataKeyEnumerable::OwnerIndexToken(to.clone()).set(&env, &owner_index);
                 DataKeyEnumerable::OwnerTokenIndex(to.clone()).set(&env, &owner_token_index);
 
-                DataKey::Balance(to).set(&env, &owner_index.len());
+                DataKey::Balance(to.clone()).set(&env, &owner_index.len());
             } else {
-                let key = DataKey::Balance(to);
+                let key = DataKey::Balance(to.clone());
                 let balance: u32 = key.get(&env).unwrap_or(0);
                 key.set(&env, &(balance + 1));
             }
         }
+        let mut v: Vec<Val> = Vec::new(&env);
+        v.push_back(to.into_val(&env));
+        v.push_back(token_id.into());
+        Event::Mint.publish(&env, v);
     }
 }
 

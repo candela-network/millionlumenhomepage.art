@@ -140,12 +140,12 @@ impl Million {
 
     pub fn token_uri(env: Env, token_id: u32) -> String {
         if token_id < MillionDataKey::TokenId.get(&env).unwrap_or(0) {
-            let mut slice = [0; 67];
+            let mut slice = [0; 48];
             let d = to_hex(token_id);
             let mut uri = Bytes::new(&env);
-            uri.extend_from_slice("https://test-".as_bytes());
+            uri.extend_from_slice("https://millionlumenhomepage.art/test/".as_bytes());
             uri.extend_from_slice(d.as_slice());
-            uri.extend_from_slice(".millionlumenhomepage.art/.well-known/erc721.json".as_bytes());
+            uri.extend_from_slice(".json".as_bytes());
             uri.copy_into_slice(&mut slice);
             let struri = core::str::from_utf8(slice.as_slice()).unwrap();
             String::from_slice(&env, struri)

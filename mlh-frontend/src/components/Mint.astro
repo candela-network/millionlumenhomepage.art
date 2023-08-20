@@ -31,41 +31,34 @@ button {
 </style>
 <script>
   import * as client from 'Million';
-   import * as wallet from '@stellar/freighter-api';
+  import * as wallet from '@stellar/freighter-api';
   import {xdr} from 'stellar-base';
   const wrap = document.querySelector('#freighter-wrap');
   const button = document.querySelector('[data-connect]');
   button.addEventListener('click', async () => {
-    console.log("check allowed")
-      if (!(await wallet.isAllowed())) {
-       await wallet.setAllowed();
-      }
-    console.log("get pubkey")
-      const { publicKey } = await wallet.getUserInfo();
-    console.log("mint")
+    if (!(await wallet.isAllowed())) {
+      await wallet.setAllowed();
+    }
+    const { publicKey } = await wallet.getUserInfo();
     console.log(client.CONTRACT_ID)
-      let rnum = Math.floor(Math.random() * 4096);
-      let x = Math.floor(rnum % 2048);
-      let y = Math.floor(rnum / 512);
-      console.log(x);
-      console.log(y)
-      let result = await client.mint({to: publicKey, x: x, y: y}, {fee: 500000, responseType: "full", wallet: wallet});
-      if (result.status == "SUCCESS") {
-        let rvalue = xdr.TransactionMeta.fromXDR(result.resultMetaXdr, 'base64').v3().sorobanMeta().returnValue().u32();
-        let result2 = await client.tokenUri({token_id: rvalue}, {responseType: "simulated", fee: 100000, wallet: wallet});
-        console.log(result2)
-        if (result2.results[0].xdr) {
-          let xdrUri = result2.results[0].xdr;
-          let uri = xdr.ScVal.fromXDR(xdrUri, 'base64').str().toString()
-          console.log(uri)
-        }
-        console.log("r=" + rvalue)
-        //let token_uri = await client.tokenUri({token_id: 0}, {})
+    let rnum = Math.floor(Math.random() * 4096);
+    let x = Math.floor(rnum % 2048);
+    let y = Math.floor(rnum / 512);
+    let result = await client.mint({to: publicKey, x: x, y: y}, {fee: 500000, responseType: "full", wallet: wallet});
+    if (result.status == "SUCCESS") {
+      let rvalue = xdr.TransactionMeta.fromXDR(result.resultMetaXdr, 'base64').v3().sorobanMeta().returnValue().u32();
+      let result2 = await client.tokenUri({token_id: rvalue}, {responseType: "simulated", fee: 100000, wallet: wallet});
+      console.log(result2)
+      if (result2.results[0].xdr) {
+        let xdrUri = result2.results[0].xdr;
+        let uri = xdr.ScVal.fromXDR(xdrUri, 'base64').str().toString()
+        console.log(uri)
       }
-      //console.log(result);
+      console.log("r=" + rvalue)
+    }
   });
   button.addEventListener('mouseenter', async () =>  {
-    button.style.width = "20ch";
+    button.style.width = "15ch";
     button.innerHTML = '256XLM ⇋ 256px';
   })
   button.addEventListener('mouseleave', async () =>  {
