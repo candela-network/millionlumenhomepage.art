@@ -140,10 +140,12 @@ impl Million {
 
     pub fn token_uri(env: Env, token_id: u32) -> String {
         if token_id < MillionDataKey::TokenId.get(&env).unwrap_or(0) {
-            let mut slice = [0; 48];
+            //let mut slice = [0; 48];
+            let mut slice = [0; 37];
             let d = to_hex(token_id);
             let mut uri = Bytes::new(&env);
-            uri.extend_from_slice("https://millionlumenhomepage.art/test/".as_bytes());
+            //uri.extend_from_slice("https://millionlumenhomepage.art/test/".as_bytes());
+            uri.extend_from_slice("http://localhost:3000/test/".as_bytes());
             uri.extend_from_slice(d.as_slice());
             uri.extend_from_slice(".json".as_bytes());
             uri.copy_into_slice(&mut slice);
@@ -165,6 +167,10 @@ impl Million {
         erc721::DataKey::TokenOwner(token_id)
             .get(&env)
             .unwrap_or_else(|| panic!("token_id does not exist"))
+    }
+
+    pub fn coords(env: Env, token_id: u32) -> Option<(u32, u32)> {
+        Coords::Xy(token_id).get(&env)?
     }
 }
 fn to_hex(n: u32) -> [u8; 5] {

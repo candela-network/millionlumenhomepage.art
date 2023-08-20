@@ -16,7 +16,7 @@ export async function get({params, request}) {
   let data = {
     name: id,
     description: "",
-    image: `${import.meta.env.SITE}${import.meta.env.BASE_URL}test/default.png`,
+    image: `${import.meta.env.SITE}${import.meta.env.BASE_URL}question.png`,
     home_page: `${import.meta.env.SITE}${import.meta.env.BASE_URL}test/${id}`,
   };
   try {

@@ -26,14 +26,19 @@ if (num >= total) {
 
 const owner = await million.ownerOf({token_id: num}, {wallet: FakeWallet});
 console.log(owner)
+let uri = await million.tokenUri({token_id: num}, {wallet: FakeWallet});
+console.log(uri)
+let response = await fetch(uri);
+let data = await response.json();
 
+const image = data.image;
 
  ---
 <Layout title={id}>
 	<main>
     <div class="homepage"><a href="/">← million lumen homepage</a></div>
     <h1>{id}</h1>
-    <SmallFrame   />
+    <SmallFrame src={image}  />
   </main>
 </Layout>
 <style>
@@ -43,5 +48,8 @@ console.log(owner)
 a, a:visited {
   text-decoration: none;
   color: black;
+}
+main {
+  padding: 2em;
 }
 </style>

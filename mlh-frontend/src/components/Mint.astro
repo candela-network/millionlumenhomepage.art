@@ -26,7 +26,7 @@ button {
     cursor: pointer;
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset, 0 5px 10px 5px rgba(0, 0, 0, 0.25);
 
-    transition: width 0.2s linear;
+    transition: width 0.1s linear;
   }
 </style>
 <script>
@@ -41,25 +41,34 @@ button {
     }
     const { publicKey } = await wallet.getUserInfo();
     console.log(client.CONTRACT_ID)
-    let rnum = Math.floor(Math.random() * 4096);
-    let x = Math.floor(rnum % 2048);
-    let y = Math.floor(rnum / 512);
-    let result = await client.mint({to: publicKey, x: x, y: y}, {fee: 500000, responseType: "full", wallet: wallet});
-    if (result.status == "SUCCESS") {
-      let rvalue = xdr.TransactionMeta.fromXDR(result.resultMetaXdr, 'base64').v3().sorobanMeta().returnValue().u32();
-      let result2 = await client.tokenUri({token_id: rvalue}, {responseType: "simulated", fee: 100000, wallet: wallet});
-      console.log(result2)
-      if (result2.results[0].xdr) {
-        let xdrUri = result2.results[0].xdr;
-        let uri = xdr.ScVal.fromXDR(xdrUri, 'base64').str().toString()
-        console.log(uri)
+    let retry = 3;
+    while (retry > 0) {
+      retry--;
+      let x = Math.floor(Math.random() * 2048);
+      let y = Math.floor(Math.random() * 512);
+      let result = await client.mint({to: publicKey, x: x, y: y}, {fee: 500000, responseType: "full", wallet: wallet});
+      if (result.status == "SUCCESS") {
+        let rvalue = xdr.TransactionMeta.fromXDR(result.resultMetaXdr, 'base64').v3().sorobanMeta().returnValue().u32();
+        let result2 = await client.tokenUri({token_id: rvalue}, {responseType: "simulated", fee: 100000, wallet: wallet});
+        if (result2.results[0].xdr) {
+          let xdrUri = result2.results[0].xdr;
+          let uri = xdr.ScVal.fromXDR(xdrUri, 'base64').str().toString()
+          let jsonResponse = await fetch(uri);
+          let jsonData = await jsonResponse.json();
+
+          console.log(uri)
+          window.location = jsonData.home_page;
+        }
       }
-      console.log("r=" + rvalue)
+      console.log("Error", result);
     }
   });
   button.addEventListener('mouseenter', async () =>  {
+    button.addEventListener("transitionend", async () => {
+
+      button.innerHTML = '256XLM ⇋ 256px';
+    }, {once: true});
     button.style.width = "15ch";
-    button.innerHTML = '256XLM ⇋ 256px';
   })
   button.addEventListener('mouseleave', async () =>  {
     button.innerHTML = 'Mint';

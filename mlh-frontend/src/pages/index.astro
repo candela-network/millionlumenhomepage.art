@@ -17,6 +17,21 @@ import * as million from 'Million';
   }
   console.log(total);
 
+  const table = [];
+  for (let i = 0; i < total; i++) {
+    let turi = await million.tokenUri({token_id: i}, {wallet: FakeWallet});
+    let ru = await fetch(turi);
+    let data = await ru.json();
+    table.push({
+    id: "0x" + i.toString(16).padStart(3, '0'),
+    uri: data.home_page,
+    owner: await million.ownerOf({token_id: i}, {wallet: FakeWallet}),
+    image: data.image,
+    coords: await million.coords({token_id: i}, {wallet: FakeWallet}),
+
+  })
+  }
+console.log(table)
 
 ---
 
@@ -35,7 +50,6 @@ import * as million from 'Million';
     </div>
     <div class="page" id="page-2">
       <div class="content">
-      
         <h1>Explore the new capabilites of stellar with the soroban smart contract platform</h1>
         <div style="width: fit-content; margin: auto; font-size: 2rem;">
           <p>Install <a href="https://www.freighter.app/" target="_blank">freighter</a></p>
@@ -44,7 +58,27 @@ import * as million from 'Million';
         </div>
         <Mint />
         <h2>Each NFT gives you access to your own page to build new NFTs and show off your minted or owned art</h2>
-        <h3>NFTs composing this fresque:</h3>
+      </div>
+    </div>
+    <div class="page" id="page-3">
+      <div class="content">
+        <h1>Guild of the fresque</h1>
+        <table>
+          <tr>
+            <th>Token Id</th>
+            <th>Coordinates</th>
+            <th>Owner</th>
+          </tr>
+          {
+            table.map((e) => (
+              <tr>
+                <td><img src={e.image} width="32px" height="32px" style="image-rendering: pixelated; border: 1px solid black; background-color: white;vertical-align: middle;margin: 4px;" /><a href={e.uri} >{e.id}</a></td>
+                <td>({e.coords[0]}, {e.coords[1]})</td>
+                <td><abbr title={e.owner}>{e.owner.substring(0,4) + "..." + e.owner.substring(52)}</abbr></td>
+              </tr>
+            ))
+          } 
+        </table>
       </div>
     </div>
 	</main>
@@ -82,7 +116,23 @@ import * as million from 'Million';
   background-color: #cde;
 }
 #page-2 {
-  background-color: #ffeeff;
+  background-color: #f7f3b7;
+}
+#page-3 {
+  background-color: #cde;
+}
+table {
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 1.5em;
+  margin-bottom: 2em;
+}
+td, th {
+  text-align: center;
+  //border: 1px solid black;
+  padding-left: 1em;
+  padding-right: 1em;
 }
 
 	main {
