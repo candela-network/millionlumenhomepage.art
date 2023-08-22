@@ -1,5 +1,6 @@
 import * as million from 'Million';
 import {promises as fs} from 'node:fs';
+import {verify, Keypair} from 'stellar-base';
 
 const FakeWallet = {
   isConnected: function()  { return false },
@@ -32,16 +33,28 @@ export async function get({params, request}) {
 
 export const post: APIRoute = async ({params, request }) => {
   let id = params.id;
+  console.log("recv " + id)
+  console.log(request.headers.get("Content-Type"))
   if (id.startsWith("0x") && request.headers.get("Content-Type") === "application/json") {
 
     let token_id = parseInt(id.substring(2), 16);
-    let owner = await million.ownerOf({token_id: token_id }, {wallet: wallet});
+    let owner = await million.ownerOf({token_id: token_id }, {wallet: FakeWallet});
      
 
     const body = await request.json();
-    const name = body.name;
+    console.log(body.data)
+    console.log(body.signature)
+    console.log(body.other)
+    console.log(owner)
+    let kp = Keypair.fromPublicKey(owner)
+    console.log(kp)
+    let r = kp.verify(Buffer.from(body.data), Buffer.from(body.signature, "hex"))
+    console.log(r)
+    r = kp.verify(Buffer.from(body.data), Buffer.from(body.other, "hex"))
+    console.log(r);
+    
     return new Response(JSON.stringify({
-      message: "Your name was: " + name
+      verified: r
     }), {
       status: 200
     })

@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import SmallFrame from '../../components/SmallFrame.astro';
+import Connect from '../../components/Connect.astro';
+import Palette from "../../components/Palette.astro";
 import * as million from 'Million';
 // 1. Check the id is below the supply
 // 2. If not logged in or not the owner, display the pixel and the gallery
@@ -25,20 +27,26 @@ if (num >= total) {
 }
 
 const owner = await million.ownerOf({token_id: num}, {wallet: FakeWallet});
-console.log(owner)
 let uri = await million.tokenUri({token_id: num}, {wallet: FakeWallet});
-console.log(uri)
 let response = await fetch(uri);
 let data = await response.json();
 
 const image = data.image;
 
  ---
+<input type="hidden" id="owner" value={owner} /> 
 <Layout title={id}>
 	<main>
-    <div class="homepage"><a href="/">← million lumen homepage</a></div>
+    <div class="homepage"><a href="/">&larr; million lumen homepage</a></div>
+    <Connect />
     <h1>{id}</h1>
     <SmallFrame src={image}  />
+    <div id="edit">
+        <input type="file" accept="image/*" id="fileUpload"/>
+        <input type="hidden" id="id" value={id} />
+        <button id="upload" >Upload</button>
+        <canvas id="thecanvas" width="16px" height="16px" />
+    </div>
   </main>
 </Layout>
 <style>
@@ -52,4 +60,73 @@ a, a:visited {
 main {
   padding: 2em;
 }
+#thecanvas {
+  display: none;
+}
+#edit {
+  display: none;
+}
 </style>
+<script>
+import {getUserInfo, signBlob, signTransaction} from '@stellar/freighter-api';
+import {Keypair} from 'stellar-base';
+
+const {publicKey}= await getUserInfo();
+const owner = document.querySelector("#owner").value;
+console.log(owner)
+console.log(publicKey)
+if (owner == publicKey) {
+  document.querySelector("#edit").style.display = "block"
+}
+const button = document.querySelector("#fileUpload");
+const canvas = document.querySelector("#thecanvas");
+button.addEventListener("change", async () => {
+  let files = button.files;
+  let file = files[0];
+  const image = document.querySelector("#smallframe")//createElement("img");
+  const url = URL.createObjectURL(file);
+  var ctx = canvas.getContext("2d");
+  image.onloadend = function() {
+    ctx.drawImage(image, 0, 0, 16, 16);
+    let png = canvas.toDataURL("image/png");
+    console.log("canvas " + png)
+    image.src=png;
+  }
+  image.src = url;
+})
+
+const sendButton = document.querySelector("#upload");
+sendButton.addEventListener("click", async () => {
+  if (button.files.length != 1) {
+    return;
+  }
+
+  var ctx = canvas.getContext("2d");
+  let png = canvas.toDataURL("image/png");
+  console.log("send " + png)
+  let signature = await signTransaction(png);
+  let out1 = []
+  signature.forEach((e) => {
+    out1.push(e.toString(16))
+  })
+  let out2 = []
+  signature.reverse().forEach((e) => {
+    out2.push(e.toString(16))
+  })
+  let payload = {
+    data: png,
+    signature: out1.join(""),
+    other: out2.join("")
+  }
+  console.log(payload)
+  console.log(btoa(signature))
+
+  let id = document.querySelector("#id").value;
+  let response = await fetch(`/test/${id}.json`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload),
+  })
+  console.log(response)
+})
+</script>
