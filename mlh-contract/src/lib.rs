@@ -1,6 +1,6 @@
 #![no_std]
 
-use erc721::{ERC721Metadata, Error, ERC721};
+use erc721::{DataKey, ERC721Metadata, Error, ERC721};
 use soroban_sdk::{
     contract, contractimpl, panic_with_error, token, Address, Bytes, BytesN, Env, String,
 };
@@ -11,12 +11,12 @@ use crate::types::*;
 #[cfg(test)]
 pub const MAX_SUPPLY: u32 = 0xff;
 #[cfg(test)]
-pub const MAX_XY: (u32, u32) = (0x1f, 0x7f);
+pub const MAX_XY: (u32, u32) = (0xf, 0xf);
 
 #[cfg(not(test))]
 pub const MAX_SUPPLY: u32 = 0xfff;
 #[cfg(not(test))]
-pub const MAX_XY: (u32, u32) = (0x7ff, 0x1ff);
+pub const MAX_XY: (u32, u32) = (0x7f, 0x1f);
 
 #[contract]
 pub struct Million;
@@ -28,10 +28,14 @@ impl Million {
         let name = String::from_slice(&env, "Pixel");
         let sym = String::from_slice(&env, "PIX");
         MillionDataKey::TokenId
-            .bump(&env, 10_000)
+            .bump(&env, 1_000_000)
             .set::<u32>(&env, &0);
-        MillionDataKey::AssetAddress.set::<Address>(&env, &asset);
-        MillionDataKey::Price.set::<i128>(&env, &price);
+        MillionDataKey::AssetAddress
+            .bump(&env, 1_000_000)
+            .set::<Address>(&env, &asset);
+        MillionDataKey::Price
+            .bump(&env, 1_000_000)
+            .set::<i128>(&env, &price);
         erc721::ERC721Contract::initialize(env, admin, name, sym);
     }
 
@@ -78,11 +82,17 @@ impl Million {
 
         // Compute and store the next token id
         MillionDataKey::TokenId.set::<u32>(&env, &(token_id + 1));
-        Coords::Token(x, y).set(&env, &token_id);
-        Coords::Xy(token_id).set(&env, &(x, y));
+        Coords::Token(x, y)
+            .bump(&env, 1_000_000)
+            .set(&env, &token_id);
+        Coords::Xy(token_id)
+            .bump(&env, 1_000_000)
+            .set(&env, &(x, y));
 
         // Mint
-        erc721::ERC721Contract::mint(env, to, token_id);
+        erc721::ERC721Contract::mint(env.clone(), to.clone(), token_id);
+        DataKey::Balance(to).bump(&env, 1_000_000);
+        DataKey::TokenOwner(token_id).bump(&env, 1_000_000);
         Ok(token_id)
     }
 

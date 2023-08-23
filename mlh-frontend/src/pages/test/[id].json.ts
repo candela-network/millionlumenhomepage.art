@@ -1,6 +1,6 @@
 import * as million from 'Million';
 import {promises as fs} from 'node:fs';
-import {verify, Keypair} from 'stellar-base';
+import {verify, Keypair} from 'soroban-client';
 
 const FakeWallet = {
   isConnected: function()  { return false },
@@ -42,22 +42,32 @@ export const post: APIRoute = async ({params, request }) => {
      
 
     const body = await request.json();
-    console.log(body.data)
-    console.log(body.signature)
-    console.log(body.other)
-    console.log(owner)
     let kp = Keypair.fromPublicKey(owner)
     console.log(kp)
-    let r = kp.verify(Buffer.from(body.data), Buffer.from(body.signature, "hex"))
-    console.log(r)
-    r = kp.verify(Buffer.from(body.data), Buffer.from(body.other, "hex"))
-    console.log(r);
-    
-    return new Response(JSON.stringify({
-      verified: r
-    }), {
-      status: 200
-    })
+    let verified = kp.verify(Buffer.from(body.data, "base64"), Buffer.from(body.signature, "hex"))
+
+    if (verified) {
+
+      let filename = `data-${id}.json`;
+      let data = {
+        name: id,
+        description: "",
+        image: `${import.meta.env.SITE}${import.meta.env.BASE_URL}question.png`,
+        home_page: `${import.meta.env.SITE}${import.meta.env.BASE_URL}test/${id}`,
+      };
+      try {
+        data = JSON.parse(await fs.readFile(filename, "utf8"));
+        data.image = Buffer.from(body.data, "base64").toString()
+      } catch (e) {
+        console.log("Error writing json")
+      }
+        fs.writeFile(filename, JSON.stringify(data));
+      return new Response(JSON.stringify({
+        verified: verified
+      }), {
+          status: 200
+        })
+    }
   }
   return new Response(null, { status: 400 });
 }

@@ -32,7 +32,7 @@ button {
 <script>
   import * as client from 'Million';
   import * as wallet from '@stellar/freighter-api';
-  import {xdr} from 'stellar-base';
+  import {xdr} from 'soroban-client';
   const wrap = document.querySelector('#freighter-wrap');
   const button = document.querySelector('[data-connect]');
   button.addEventListener('click', async () => {
@@ -40,13 +40,14 @@ button {
       await wallet.setAllowed();
     }
     const { publicKey } = await wallet.getUserInfo();
+    console.log(publicKey)
     console.log(client.CONTRACT_ID)
     let retry = 3;
     while (retry > 0) {
       retry--;
-      let x = Math.floor(Math.random() * 2048);
-      let y = Math.floor(Math.random() * 512);
-      let result = await client.mint({to: publicKey, x: x, y: y}, {fee: 500000, responseType: "full", wallet: wallet});
+      let x = Math.floor(Math.random() * 128);
+      let y = Math.floor(Math.random() * 32);
+      let result = await client.mint({to: publicKey, x: x, y: y}, {fee: 1500000, responseType: "full", wallet: wallet});
       if (result.status == "SUCCESS") {
         let rvalue = xdr.TransactionMeta.fromXDR(result.resultMetaXdr, 'base64').v3().sorobanMeta().returnValue().u32();
         let result2 = await client.tokenUri({token_id: rvalue}, {responseType: "simulated", fee: 100000, wallet: wallet});

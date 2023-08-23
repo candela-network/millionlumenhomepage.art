@@ -58,18 +58,14 @@ fn mint() {
     assert_eq!(client.balance_of(&user1), 1);
     assert_eq!(client.balance_of(&user2), 1);
 
+    let turi = client.token_uri(&0);
     let mut uri = [0u8; 67];
-    client.token_uri(&0).copy_into_slice(&mut uri);
+    let (sl, _) = uri.split_at_mut(turi.len() as usize);
+    turi.copy_into_slice(sl);
     //println!("{:?}", std::str::from_utf8(uri.as_slice()));
-    assert_eq!(
-        uri,
-        "https://test-0x000.millionlumenhomepage.art/.well-known/erc721.json".as_bytes()
-    );
-    client.token_uri(&1).copy_into_slice(&mut uri);
-    assert_eq!(
-        uri,
-        "https://test-0x001.millionlumenhomepage.art/.well-known/erc721.json".as_bytes()
-    );
+    assert_eq!(sl, "http://localhost:3000/test/0x000.json".as_bytes());
+    client.token_uri(&1).copy_into_slice(sl);
+    assert_eq!(sl, "http://localhost:3000/test/0x001.json".as_bytes());
 }
 #[test]
 fn mint_all() {
