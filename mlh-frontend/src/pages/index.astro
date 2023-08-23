@@ -9,19 +9,13 @@ const FakeWallet = {
   isConnected: function()  { return false },
 }
 let total = await million.totalSupply({wallet: FakeWallet});
-let uris = []
-for (let i=0; i < total; i++) {
-  let data = await million.tokenUri({token_id: i}, {wallet: FakeWallet});
-  uris.push(data);
-}
-console.log(total);
 
 const table = [];
 for (let i = 0; i < total; i++) {
+  try {
   let turi = await million.tokenUri({token_id: i}, {wallet: FakeWallet});
   let ru = await fetch(turi);
   let data = await ru.json();
-  try {
 
     table.push({
       id: "0x" + i.toString(16).padStart(3, '0'),
