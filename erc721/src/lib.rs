@@ -327,7 +327,7 @@ impl ERC721Contract {
     }
 }
 
-fn get_admin(env: &Env) -> Address {
+pub fn get_admin(env: &Env) -> Address {
     if let Some(addr) = Admin::User.get(env) {
         addr
     } else {

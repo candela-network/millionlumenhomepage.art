@@ -7,8 +7,7 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "postinstall": "soroban contract bindings typescript --wasm ../target/wasm32-unknown-unknown/release/mlh_contract.wasm --network standalone --contract-id $(cat ./contract.id) --contract-name Million --output-dir node_modules/Million"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/node": "^5.3.4",

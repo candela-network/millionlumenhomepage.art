@@ -13,7 +13,7 @@ export async function get({params, request}) {
     return new Response(null, {status: 404});
   }
 
-  let filename = `data-${id}.json`;
+  let filename = `./data/data-${id}.json`;
   let data = {
     name: id,
     description: "",
@@ -51,7 +51,7 @@ export const post: APIRoute = async ({params, request }) => {
 
     if (verified) {
 
-      let filename = `data-${id}.json`;
+      let filename = `./data/data-${id}.json`;
       let data = {
         name: id,
         description: "",

@@ -8,6 +8,8 @@ use storage::Storage;
 mod types;
 use crate::types::*;
 
+const MAX_BUMP: u32 = 6_000_000;
+
 #[cfg(test)]
 pub const MAX_SUPPLY: u32 = 0xff;
 #[cfg(test)]
@@ -28,13 +30,13 @@ impl Million {
         let name = String::from_slice(&env, "Pixel");
         let sym = String::from_slice(&env, "PIX");
         MillionDataKey::TokenId
-            .bump(&env, 1_000_000)
+            .bump(&env, MAX_BUMP)
             .set::<u32>(&env, &0);
         MillionDataKey::AssetAddress
-            .bump(&env, 1_000_000)
+            .bump(&env, MAX_BUMP)
             .set::<Address>(&env, &asset);
         MillionDataKey::Price
-            .bump(&env, 1_000_000)
+            .bump(&env, MAX_BUMP)
             .set::<i128>(&env, &price);
         erc721::ERC721Contract::initialize(env, admin, name, sym);
     }
@@ -69,7 +71,7 @@ impl Million {
         // Pay the NFT
         let asset = MillionDataKey::AssetAddress.get::<Address>(&env).unwrap();
         let price = MillionDataKey::Price.get::<i128>(&env).unwrap();
-        token::Client::new(&env, &asset).transfer(&to, &env.current_contract_address(), &price);
+        token::Client::new(&env, &asset).transfer(&to, &erc721::get_admin(&env), &price);
 
         // Retrieve the token id to mint
         let token_id: u32 = MillionDataKey::TokenId.get(&env).unwrap_or(0);
@@ -83,16 +85,14 @@ impl Million {
         // Compute and store the next token id
         MillionDataKey::TokenId.set::<u32>(&env, &(token_id + 1));
         Coords::Token(x, y)
-            .bump(&env, 1_000_000)
+            .bump(&env, MAX_BUMP)
             .set(&env, &token_id);
-        Coords::Xy(token_id)
-            .bump(&env, 1_000_000)
-            .set(&env, &(x, y));
+        Coords::Xy(token_id).bump(&env, MAX_BUMP).set(&env, &(x, y));
 
         // Mint
         erc721::ERC721Contract::mint(env.clone(), to.clone(), token_id);
-        DataKey::Balance(to).bump(&env, 1_000_000);
-        DataKey::TokenOwner(token_id).bump(&env, 1_000_000);
+        DataKey::Balance(to).bump(&env, MAX_BUMP);
+        DataKey::TokenOwner(token_id).bump(&env, MAX_BUMP);
         Ok(token_id)
     }
 
