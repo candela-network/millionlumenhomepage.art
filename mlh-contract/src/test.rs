@@ -63,9 +63,15 @@ fn mint() {
     let (sl, _) = uri.split_at_mut(turi.len() as usize);
     turi.copy_into_slice(sl);
     //println!("{:?}", std::str::from_utf8(uri.as_slice()));
-    assert_eq!(sl, "http://localhost:3000/test/0x000.json".as_bytes());
+    assert_eq!(
+        sl,
+        "https://millionlumenhomepage.art/test/0x000.json".as_bytes()
+    );
     client.token_uri(&1).copy_into_slice(sl);
-    assert_eq!(sl, "http://localhost:3000/test/0x001.json".as_bytes());
+    assert_eq!(
+        sl,
+        "https://millionlumenhomepage.art/test/0x001.json".as_bytes()
+    );
 }
 #[test]
 fn mint_all() {

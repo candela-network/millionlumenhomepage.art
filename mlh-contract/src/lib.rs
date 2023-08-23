@@ -150,8 +150,8 @@ impl Million {
 
     pub fn token_uri(env: Env, token_id: u32) -> String {
         if token_id < MillionDataKey::TokenId.get(&env).unwrap_or(0) {
-            const BASE: &str = "http://localhost:3000/test/";
-            //const BASE: &str = "https://millionlumenhomepage.art/test/";
+            //const BASE: &str = "http://localhost:3000/test/";
+            const BASE: &str = "https://millionlumenhomepage.art/test/";
             let d = to_hex(token_id);
 
             // concat
