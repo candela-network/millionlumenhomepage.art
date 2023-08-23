@@ -12,9 +12,11 @@ export async function get({params, request}) {
   let now = Date.now();
   if (now - x.get() > 10000) {
     console.log("Updating the fresco")
-    update();
+    await update();
     x.set(now);
-  } 
+  } else {
+    console.log("from cache")
+  }
   try {
 
   return {
@@ -34,14 +36,14 @@ async function update() {
   let max = await million.totalSupply({wallet: FakeWallet});
   let fresque = new Jimp(2048, 512);
   for (let id=0; id < max; id++) {
-    console.log(id)
     let filename = `data-0x${id.toString(16).padStart(3, "0")}.json`;
     try {
       let data = JSON.parse(await fs.readFile(filename, "utf8"));
       let b64 = data.image.substring(data.image.indexOf(',')+1);
       let image = b64 != data.image ? await Jimp.read(Buffer.from(b64, "base64")) : await Jimp.read(data.image);
 
-      let xy = await million.coords({token_id: id}, {wallet: FakeWallet});
+      let xy = JSON.parse(await fs.readFile(filename, "utf8")).coords;
+      console.log(xy)
       fresque.composite(image, xy[0] * 16, xy[1] * 16);
     } catch (e) {
       //
