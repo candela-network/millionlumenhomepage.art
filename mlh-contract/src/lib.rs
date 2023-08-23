@@ -150,16 +150,21 @@ impl Million {
 
     pub fn token_uri(env: Env, token_id: u32) -> String {
         if token_id < MillionDataKey::TokenId.get(&env).unwrap_or(0) {
-            //let mut slice = [0; 48];
-            let mut slice = [0; 37];
+            const BASE: &str = "http://localhost:3000/test/";
+            //const BASE: &str = "https://millionlumenhomepage.art/test/";
             let d = to_hex(token_id);
+
+            // concat
             let mut uri = Bytes::new(&env);
-            //uri.extend_from_slice("https://millionlumenhomepage.art/test/".as_bytes());
-            uri.extend_from_slice("http://localhost:3000/test/".as_bytes());
+            uri.extend_from_slice(BASE.as_bytes());
             uri.extend_from_slice(d.as_slice());
             uri.extend_from_slice(".json".as_bytes());
+
+            // Bytes to &str
+            let mut slice = [0; BASE.len() + 10];
             uri.copy_into_slice(&mut slice);
             let struri = core::str::from_utf8(slice.as_slice()).unwrap();
+
             String::from_slice(&env, struri)
         } else {
             panic_with_error!(&env, Error::NotNFT);

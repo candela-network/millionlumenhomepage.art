@@ -43,7 +43,6 @@ async function update() {
       let image = b64 != data.image ? await Jimp.read(Buffer.from(b64, "base64")) : await Jimp.read(data.image);
 
       let xy = JSON.parse(await fs.readFile(filename, "utf8")).coords;
-      console.log(xy)
       fresque.composite(image, xy[0] * 16, xy[1] * 16);
     } catch (e) {
       //
