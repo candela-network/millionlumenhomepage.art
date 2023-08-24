@@ -4,7 +4,7 @@ import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "http://localhost:3000",
+  site: "https://millionlumenhomepage.art",
   output: "server",
   adapter: node({
     mode: "standalone"
