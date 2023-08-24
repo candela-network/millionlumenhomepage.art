@@ -22,7 +22,7 @@ for (let i = 0; i < total; i++) {
       uri: data.home_page,
       owner: await million.ownerOf({token_id: i}, {wallet: FakeWallet}),
       image: data.image,
-      coords: await million.coords({token_id: i}, {wallet: FakeWallet}),
+      coords: data.coords,
 
     })
   } catch {}
