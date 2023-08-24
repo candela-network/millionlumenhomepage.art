@@ -16,12 +16,8 @@ soroban contract invoke --id $CONTRACT_ID --source admin --network futurenet -- 
 
 echo $CONTRACT_ID >contract.id
 
-rm -r data
-rm -r node_modules
-npm i
 soroban contract bindings typescript --wasm ./target/milltion-prod.wasm \
 	--network futurenet \
 	--contract-id $(cat ./contract.id) \
 	--contract-name Million \
-	--output-dir node_modules/Million
-mkdir data
+	--output-dir ./Million
