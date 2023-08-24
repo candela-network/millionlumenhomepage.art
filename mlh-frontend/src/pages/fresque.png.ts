@@ -9,22 +9,19 @@ const FakeWallet = {
 };
 export async function get({params, request}) {
 
+  let fresque = undefined;
   let now = Date.now();
   if (now - x.get() > 10000) {
     console.log("Updating the fresco")
-    await update();
+    fresque = await update();
     x.set(now);
   } else {
     console.log("from cache")
+    fresque = await Jimp.read('./data/data-fresque.png');
   }
-  try {
-    return {
-      body: await (await Jimp.read('./data/data-fresque.png')).getBufferAsync("image/png"),
-    };
-  } catch {
-    await update();
-    return get({params, request});
-  }
+  return {
+    body: await fresque.getBufferAsync("image/png"),
+  };
 }
 
 async function update() {
@@ -46,4 +43,6 @@ async function update() {
     }
   }
    fresque.write('./data/data-fresque.png');
+
+  return fresque;
 }
