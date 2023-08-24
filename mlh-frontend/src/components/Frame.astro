@@ -1,14 +1,15 @@
 ---
 interface Props {
-  src: string;	
   height: string;
   width: string;
 }
 
-const { src, height, width } = Astro.props;
+const {  height, width } = Astro.props;
+let r = await fetch("http://localhost:3000/fresque.png");
+const data = await r.text();
 ---
 <div class="img-magnifier-container frame">
-  <image id="fresque" src={src} height="512" width="2048" />
+  <image id="fresque" src={data} height="512" width="2048" />
 </div>
 
 <style>
