@@ -126,11 +126,15 @@ button.addEventListener("change", async () => {
   const image = document.querySelector("#smallframe")//createElement("img");
   const url = URL.createObjectURL(file);
   var ctx = canvas.getContext("2d");
-  image.onloadend = function() {
-    ctx.drawImage(image, 0, 0, 16, 16);
-    let png = canvas.toDataURL("image/png");
-    console.log("canvas " + png)
-    image.src=png;
+  let loaded = false;
+  image.onload = function() {
+    if (!loaded) {
+      loaded = true;
+      ctx.drawImage(image, 0, 0, 16, 16);
+      let png = canvas.toDataURL("image/png");
+      console.log("canvas " + png)
+      image.src=png;
+    }
   }
   image.src = url;
 })
@@ -141,9 +145,14 @@ sendButton.addEventListener("click", async () => {
     return;
   }
 
+const canvas = document.querySelector("#thecanvas");
   var ctx = canvas.getContext("2d");
+	console.log(canvas.toDataURL("image/png"))
   let png = btoa(canvas.toDataURL("image/png"));
   let signature = await signBlob(png);
+  if (signature.data) {
+    signature = signature.data;
+  }
   let out = ''
   signature.forEach((e) =>{
     out += e.toString(16).padStart(2, '0')
