@@ -3,8 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
 import Frame from '../components/Frame.astro';
 import Mint from '../components/Mint.astro';
-import * as million from 'Million';
-
+/*import * as million from 'Million';
 const FakeWallet = {
   isConnected: function()  { return false },
 }
@@ -14,7 +13,7 @@ const table = [];
 for (let i = 0; i < total; i++) {
   try {
   let turi = await million.tokenUri({token_id: i}, {wallet: FakeWallet});
-  let ru = await fetch(turi);
+  let ru = await fetch(turi); //`./data/data-0x${i.toString(16).padStart(3, '0')}`);
   let data = await ru.json();
 
     table.push({
@@ -27,7 +26,7 @@ for (let i = 0; i < total; i++) {
     })
   } catch {}
 }
-
+*/
 ---
 
 <Layout title="million lumen homepage">
@@ -63,15 +62,6 @@ for (let i = 0; i < total; i++) {
             <th>Coordinates</th>
             <th>Owner</th>
           </tr>
-          {
-            table.map((e) => (
-              <tr>
-                <td><img src={e.image} width="32px" height="32px" style="image-rendering: pixelated; border: 1px solid black; background-color: white;vertical-align: middle;margin: 4px;" /><a href={e.uri} >{e.id}</a></td>
-                <td>({e.coords[0]}, {e.coords[1]})</td>
-                <td><abbr title={e.owner}>{e.owner.substring(0,4) + "..." + e.owner.substring(52)}</abbr></td>
-              </tr>
-            ))
-          } 
         </table>
       </div>
     </div>
@@ -163,3 +153,29 @@ td, th {
 		margin-bottom: 1em;
 	}
 </style>
+<script>
+
+import * as million from 'Million';
+const FakeWallet = {
+  isConnected: function()  { return false },
+}
+let total = await million.totalSupply({wallet: FakeWallet});
+
+const table = document.querySelector("table");
+let subtable = "";
+for (let i = 0; i < total; i++) {
+  try {
+  let turi = await million.tokenUri({token_id: i}, {wallet: FakeWallet});
+  let ru = await fetch(turi);
+  let data = await ru.json();
+  let owner = await million.ownerOf({token_id: i}, {wallet: FakeWallet});
+  subtable += `<tr> 
+	  <td><img src=${data.image} width="32px" height="32px" style="image-rendering: pixelated; border: 1px solid black; background-color: white;vertical-align: middle;margin: 4px;" /><a href=${data.home_page} >0x${i.toString(16).padStart(3, '0')}</a></td>
+	  <td>(${data.coords[0]}, ${data.coords[1]})</td>
+	  <td><abbr title=${owner}>${owner.substring(0,4) + "..." + owner.substring(52)}</abbr></td>
+	  </tr>`;
+
+  } catch {}
+}
+table.innerHTML += subtable;
+</script>
