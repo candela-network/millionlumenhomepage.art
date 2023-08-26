@@ -47,7 +47,7 @@ curl "http://localhost:8000/friendbot?addr=$(soroban config identity address adm
 
 We need to wrap the asset we will use when minting the NFT. Here
 we will simply wrap the native asset, feel free to experiment with other
-custome assets.
+custom assets.
 
 ```
 soroban lab token wrap --asset native --network standalone --source admin
@@ -106,7 +106,7 @@ npm i                                     # install all deps
 soroban contract bindings typescript \
     --wasm ./target/milltion-prod.wasm \
 	--network standalone \
-	--contract-id $(cat ./contract.id) \
+	--contract-id $CONTRACT_ID \
 	--contract-name Million \
 	--output-dir node_modules/Million
 
