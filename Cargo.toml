@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["storage", "erc721", "mlh-contract"]
+members = ["storage", "erc721", "mlh-contract", "mlh-marketplace"]
 
 [workspace.dependencies]
 soroban-sdk = { version = "0.9.2", default-features = false }
