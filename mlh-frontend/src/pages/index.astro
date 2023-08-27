@@ -5,6 +5,7 @@ import Frame from '../components/Frame.astro';
 import Mint from '../components/Mint.astro';
 import * as million from 'Million';
 
+console.log(million.CONTRACT_ID)
 const FakeWallet = {
   isConnected: function()  { return false },
 }
@@ -56,7 +57,7 @@ for (let i = 0; i < total; i++) {
     </div>
     <div class="page" id="page-3">
       <div class="content">
-        <h1>The Collective</h1>
+        <h1>The Pixels</h1>
         <table>
           <tr>
             <th>Token Id</th>
