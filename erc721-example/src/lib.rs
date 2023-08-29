@@ -1,10 +1,13 @@
 #![no_std]
 
 use erc721::{DatakeyMetadata, ERC721Metadata, ERC721};
-use soroban_sdk::{contract, contractimpl, symbol_short, Address, BytesN, Env, String, Symbol};
+use soroban_sdk::{
+    contract, contractimpl, contracttype, symbol_short, Address, BytesN, Env, String, Symbol,
+};
 
-const ID: Symbol = symbol_short!("id");
-const BASE_URL: Symbol = symbol_short!("base");
+#[contracttype]
+pub struct Id();
+
 #[contract]
 pub struct MyNFTCollection;
 
@@ -13,10 +16,9 @@ pub struct MyNFTCollection;
 ///
 #[contractimpl]
 impl MyNFTCollection {
-    pub fn initialize(env: Env, admin: Address, uri: String) {
+    pub fn initialize(env: Env, admin: Address) {
         let name = String::from_slice(&env, "Non-Fungible Token");
         let sym = String::from_slice(&env, "NFT");
-        env.storage().instance().set(&BASE_URL, &uri);
         erc721::ERC721Contract::initialize(env, admin, name, sym);
     }
 
@@ -24,22 +26,18 @@ impl MyNFTCollection {
         erc721::ERC721Contract::upgrade(env, wasm_hash)
     }
 
-    pub fn mint(env: Env, to: Address) {
-        // Check the destination approved the transaction
-        to.require_auth();
+    pub fn mint(env: Env, to: Address, uri: String) {
+        // Check ownly the admin can mint
+        erc721::get_admin(&env).require_auth();
 
         // Get and increment token id
-        let token_id = env.storage().instance().get(&ID).unwrap_or(0);
-        env.storage().instance().set(&ID, &(token_id + 1));
+        let token_id = env.storage().instance().get(&Id()).unwrap_or(0);
+        env.storage().instance().set(&Id(), &(token_id + 1));
 
         // set the uri for the token id
-        env.storage().persistent().set(
-            &DatakeyMetadata::Uri(token_id),
-            &env.storage()
-                .instance()
-                .get::<Symbol, String>(&BASE_URL)
-                .unwrap(),
-        );
+        env.storage()
+            .persistent()
+            .set(&DatakeyMetadata::Uri(token_id), &uri);
 
         // Mint
         erc721::ERC721Contract::mint(env.clone(), to.clone(), token_id)
