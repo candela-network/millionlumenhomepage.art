@@ -1,0 +1,9 @@
+[package]
+name = "erc721-example"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+soroban-sdk = { workspace = true }
+erc721 = { workspace = true, default-features = false, features = ["metadata"] }
