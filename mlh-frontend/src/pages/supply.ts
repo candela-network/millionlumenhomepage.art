@@ -1,10 +1,16 @@
-import * as million from 'Million';
+import {Contract, networks} from 'Million';
 
 export async function get({params, request}) {
 
   const FakeWallet = {
     isConnected: function()  { return false },
   }
+
+  const million = new Contract({
+    ...networks.localnet,
+    rpcUrl: 'http://localhost:8000/soroban/rpc',
+    wallet: FakeWallet,
+  })
   console.log("Calling total_supply");
   let total = await million.totalSupply({wallet: FakeWallet});
   let uris = []

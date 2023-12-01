@@ -5,10 +5,16 @@ use std::println;
 
 use super::*;
 //use crate::MillionError;
-use soroban_sdk::{testutils::Address as _, Address, Env};
+use soroban_sdk::{bytesn, testutils::Address as _, Address, Env};
 #[test]
 fn init() {
     let env = Env::default();
+
+    let deployer = env.deployer().with_address(
+        Address::random(&env),
+        BytesN::<32>::from_array(&env, &[0; 32]),
+    );
+
     let contract_id = env.register_contract(None, Million);
     let client = MillionClient::new(&env, &contract_id);
 
@@ -30,7 +36,7 @@ fn mint() {
 
     let asset_admin = Address::random(&env);
     let native_addr = env.register_stellar_asset_contract(asset_admin.clone());
-    let asset_client_admin = token::AdminClient::new(&env, &native_addr);
+    let asset_client_admin = token::StellarAssetClient::new(&env, &native_addr);
 
     let admin = Address::random(&env);
     client.initialize(&admin, &native_addr, &2_560_000_000);
@@ -76,7 +82,7 @@ fn mint_all() {
 
     let asset_admin = Address::random(&env);
     let native_addr = env.register_stellar_asset_contract(asset_admin.clone());
-    let asset_client_admin = token::AdminClient::new(&env, &native_addr);
+    let asset_client_admin = token::StellarAssetClient::new(&env, &native_addr);
 
     let admin = Address::random(&env);
     client.initialize(&admin, &native_addr, &2_560_000_000);

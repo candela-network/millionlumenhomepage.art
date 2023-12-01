@@ -3,13 +3,19 @@ import Layout from '../../layouts/Layout.astro';
 import SmallFrame from '../../components/SmallFrame.astro';
 import Connect from '../../components/Connect.astro';
 import Palette from "../../components/Palette.astro";
-import * as million from 'Million';
+import {Contract, networks} from 'Million';
 // 1. Check the id is below the supply
 // 2. If not logged in or not the owner, display the pixel and the gallery
 // 2. if owner, the pixel is editable, you can set the price on the items in the gallery 
 //
 // 
 const FakeWallet = { isConnected: function()  { return false },};
+
+const million = new Contract({
+  ...networks.localnet,
+  rpcUrl: 'http://localhost:8000/soroban/rpc',
+  wallet: FakeWallet,
+})
 const { id } = Astro.params;
 
 // Do not access if does not start with 0x
@@ -19,15 +25,15 @@ if (!id.startsWith("0x")) {
 
 console.log(million.CONTRACT_ID)
 let num = parseInt(id.substring(2), 16);
-let total = await million.totalSupply({wallet: FakeWallet});
+let total = await million.totalSupply();
 
 // Do not display if not minted
 if (num >= total) {
   return Astro.redirect("/404");
 }
 
-const owner = await million.ownerOf({token_id: num}, {wallet: FakeWallet});
-let uri = await million.tokenUri({token_id: num}, {wallet: FakeWallet});
+const owner = await million.ownerOf({token_id: num});
+let uri = await million.tokenUri({token_id: num});
 let response = await fetch(uri);
 let data = await response.json();
 

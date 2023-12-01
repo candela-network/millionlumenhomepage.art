@@ -1,5 +1,5 @@
 
-import * as million from 'Million';
+import {Contract, networks} from 'Million';
 import Jimp from 'jimp';
 import {promises as fs} from 'node:fs';
 import {x} from '../keyStore.ts';
@@ -27,7 +27,13 @@ export async function get({params, request}) {
 
 async function update() {
 
-  let max = await million.totalSupply({wallet: FakeWallet});
+  const million = new Contract({
+    ...networks.localnet,
+    rpcUrl: 'http://localhost:8000/soroban/rpc',
+    wallet: FakeWallet,
+  })
+
+  let max = await million.totalSupply();
   let fresque = new Jimp(2048, 512);
   for (let id=0; id < max; id++) {
     let filename = `./data/data-0x${id.toString(16).padStart(3, "0")}.json`;

@@ -8,7 +8,7 @@ use storage::Storage;
 mod types;
 use crate::types::*;
 
-const MAX_BUMP: u32 = 6_000_000;
+const MAX_BUMP: u32 = 1_00_000;
 
 #[cfg(test)]
 pub const MAX_SUPPLY: u32 = 0xff;
@@ -84,15 +84,15 @@ impl Million {
 
         // Compute and store the next token id
         MillionDataKey::TokenId.set::<u32>(&env, &(token_id + 1));
-        Coords::Token(x, y)
-            .bump(&env, MAX_BUMP)
-            .set(&env, &token_id);
-        Coords::Xy(token_id).bump(&env, MAX_BUMP).set(&env, &(x, y));
+        Coords::Token(x, y).set(&env, &token_id);
+        Coords::Xy(token_id).set(&env, &(x, y));
 
         // Mint
         erc721::ERC721Contract::mint(env.clone(), to.clone(), token_id);
         DataKey::Balance(to).bump(&env, MAX_BUMP);
         DataKey::TokenOwner(token_id).bump(&env, MAX_BUMP);
+        Coords::Token(x, y).bump(&env, MAX_BUMP);
+        Coords::Xy(token_id).bump(&env, MAX_BUMP);
         Ok(token_id)
     }
 

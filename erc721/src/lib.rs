@@ -263,7 +263,7 @@ impl ERC721Contract {
         }
         Admin::User.set(&env, &admin);
 
-        env.storage().instance().bump(10000);
+        env.storage().instance().bump(10000, 10000);
         if cfg!(feature = "metadata") {
             env.storage().instance().set(&DatakeyMetadata::Name, &name);
             env.storage()

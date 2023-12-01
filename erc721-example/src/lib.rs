@@ -1,9 +1,7 @@
 #![no_std]
 
 use erc721::{DatakeyMetadata, ERC721Metadata, ERC721};
-use soroban_sdk::{
-    contract, contractimpl, contracttype, symbol_short, Address, BytesN, Env, String, Symbol,
-};
+use soroban_sdk::{contract, contractimpl, contracttype, Address, BytesN, Env, String};
 
 #[contracttype]
 pub struct Id();

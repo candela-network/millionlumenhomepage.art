@@ -3,25 +3,30 @@ import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
 import Frame from '../components/Frame.astro';
 import Mint from '../components/Mint.astro';
-import * as million from 'Million';
+import { Contract, networks } from "Million";
 
-console.log(million.CONTRACT_ID)
 const FakeWallet = {
   isConnected: function()  { return false },
 }
-let total = await million.totalSupply({wallet: FakeWallet});
+const million = new Contract({
+  ...networks.localnet,
+  rpcUrl: 'http://localhost:8000/soroban/rpc',
+  wallet: FakeWallet,
+})
+
+let total = await million.totalSupply();
 
 const table = [];
 for (let i = 0; i < total; i++) {
   try {
-  let turi = await million.tokenUri({token_id: i}, {wallet: FakeWallet});
+  let turi = await million.tokenUri({token_id: i});
   let ru = await fetch(turi);
   let data = await ru.json();
 
     table.push({
       id: "0x" + i.toString(16).padStart(3, '0'),
       uri: data.home_page,
-      owner: await million.ownerOf({token_id: i}, {wallet: FakeWallet}),
+      owner: await million.ownerOf({token_id: i}),
       image: data.image,
       coords: data.coords,
 
