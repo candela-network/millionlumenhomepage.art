@@ -22,7 +22,7 @@ pub struct ERC721Contract;
 impl ERC721 for ERC721Contract {
     fn balance_of(env: Env, owner: Address) -> u32 {
         DataKey::Balance(owner)
-            .bump(&env, 1000)
+            .extend(&env, 1000)
             .get(&env)
             .unwrap_or(0)
     }
@@ -93,13 +93,7 @@ impl ERC721 for ERC721Contract {
             panic_with_error!(&env, Error::NotNFT);
         }
     }
-    fn approve(
-        env: Env,
-        caller: Address,
-        operator: Option<Address>,
-        token_id: u32,
-        expiration_ledger: u32,
-    ) {
+    fn approve(env: Env, caller: Address, operator: Option<Address>, token_id: u32, ttl: u32) {
         if let Some(owner) = DataKey::TokenOwner(token_id).get::<Address>(&env) {
             if owner == caller {
                 owner.require_auth();
@@ -114,7 +108,7 @@ impl ERC721 for ERC721Contract {
         }
         if let Some(to_approve) = operator {
             DataKey::Approved(token_id).set(&env, &to_approve);
-            DataKey::Approved(token_id).bump_until(&env, expiration_ledger);
+            DataKey::Approved(token_id).extend(&env, ttl);
         } else {
             DataKey::Approved(token_id).remove(&env);
         }
@@ -125,7 +119,7 @@ impl ERC721 for ERC721Contract {
         owner: Address,
         operator: Address,
         approved: bool,
-        expiration_ledger: u32,
+        ttl: u32,
     ) {
         if owner == caller {
             owner.require_auth();
@@ -140,7 +134,7 @@ impl ERC721 for ERC721Contract {
         let key = DataKey::Operator(owner, operator);
         if approved {
             key.set(&env, &true);
-            key.bump_until(&env, expiration_ledger);
+            key.extend(&env, ttl);
         } else {
             key.remove(&env);
         }
@@ -167,7 +161,7 @@ impl ERC721Metadata for ERC721Contract {
     fn token_uri(env: Env, token_id: u32) -> String {
         DatakeyMetadata::Uri(token_id)
             .get(&env)
-            .unwrap_or_else(|| String::from_slice(&env, "no uri"))
+            .unwrap_or_else(|| String::from_str(&env, "no uri"))
     }
 }
 
@@ -263,7 +257,7 @@ impl ERC721Contract {
         }
         Admin::User.set(&env, &admin);
 
-        env.storage().instance().bump(10000, 10000);
+        env.storage().instance().extend_ttl(10000, 10000);
         if cfg!(feature = "metadata") {
             env.storage().instance().set(&DatakeyMetadata::Name, &name);
             env.storage()

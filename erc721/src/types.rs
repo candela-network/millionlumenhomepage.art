@@ -19,12 +19,8 @@ impl storage::Storage for Admin {
         storage::Persistent::has(env, self)
     }
 
-    fn bump(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
-        storage::Persistent::bump(env, self, min_ledger_to_live);
-        self
-    }
-    fn bump_until(&self, env: &Env, expiration_ledger: u32) -> &Self {
-        storage::Persistent::bump_until(env, self, expiration_ledger);
+    fn extend(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
+        storage::Persistent::extend(env, self, min_ledger_to_live);
         self
     }
 
@@ -65,24 +61,13 @@ impl Storage for DataKey {
         }
     }
 
-    fn bump(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
+    fn extend(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
         match self {
             DataKey::Balance(_) | DataKey::TokenOwner(_) => {
-                storage::Persistent::bump(env, self, min_ledger_to_live)
+                storage::Persistent::extend(env, self, min_ledger_to_live)
             }
             DataKey::Approved(_) | DataKey::Operator(_, _) => {
-                storage::Temporary::bump(env, self, min_ledger_to_live)
-            }
-        };
-        self
-    }
-    fn bump_until(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
-        match self {
-            DataKey::Balance(_) | DataKey::TokenOwner(_) => {
-                storage::Persistent::bump_until(env, self, min_ledger_to_live)
-            }
-            DataKey::Approved(_) | DataKey::Operator(_, _) => {
-                storage::Temporary::bump_until(env, self, min_ledger_to_live)
+                storage::Temporary::extend(env, self, min_ledger_to_live)
             }
         };
         self
@@ -115,12 +100,8 @@ impl storage::Storage for DatakeyMetadata {
         storage::Instance::has(env, self)
     }
 
-    fn bump(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
-        storage::Instance::bump(env, min_ledger_to_live);
-        self
-    }
-    fn bump_until(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
-        storage::Instance::bump_until(env, min_ledger_to_live);
+    fn extend(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
+        storage::Instance::extend(env, min_ledger_to_live);
         self
     }
 
@@ -149,12 +130,8 @@ impl storage::Storage for DataKeyEnumerable {
         storage::Instance::has(env, self)
     }
 
-    fn bump(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
-        storage::Instance::bump(env, min_ledger_to_live);
-        self
-    }
-    fn bump_until(&self, env: &Env, expiration_ledger: u32) -> &Self {
-        storage::Instance::bump_until(env, expiration_ledger);
+    fn extend(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
+        storage::Instance::extend(env, min_ledger_to_live);
         self
     }
 

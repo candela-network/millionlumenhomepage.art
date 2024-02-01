@@ -68,7 +68,7 @@ impl MarketPlace {
             panic!("Already initialized");
         }
         env.storage().instance().set(&CONTRACT, &contract);
-        env.storage().instance().bump(6000000, 6000000);
+        env.storage().instance().extend_ttl(6000000, 6000000);
     }
     pub fn sell(
         env: Env,
@@ -109,10 +109,12 @@ impl MarketPlace {
             .unwrap_or_else(|| Map::new(&env));
         order_book.set(nft.clone(), owner);
         env.storage().temporary().set(&ORDER_BOOK, &order_book);
-        env.storage().temporary().bump(&ORDER_BOOK, bump, bump);
+        env.storage()
+            .temporary()
+            .extend_ttl(&ORDER_BOOK, bump, bump);
 
         env.storage().temporary().set(&nft, &price);
-        env.storage().temporary().bump(&nft, bump, bump);
+        env.storage().temporary().extend_ttl(&nft, bump, bump);
     }
     pub fn buy(env: Env, buyer: Address, nft: Nft) {
         buyer.require_auth();

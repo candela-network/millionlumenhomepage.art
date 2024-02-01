@@ -18,12 +18,8 @@ impl storage::Storage for MillionDataKey {
         storage::Instance::has(env, self)
     }
 
-    fn bump(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
-        storage::Instance::bump(env, min_ledger_to_live);
-        self
-    }
-    fn bump_until(&self, env: &Env, expiration_ledger: u32) -> &Self {
-        storage::Instance::bump_until(env, expiration_ledger);
+    fn extend(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
+        storage::Instance::extend(env, min_ledger_to_live);
         self
     }
 
@@ -50,12 +46,8 @@ impl storage::Storage for Coords {
         storage::Persistent::has(env, self)
     }
 
-    fn bump(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
-        storage::Persistent::bump(env, self, min_ledger_to_live);
-        self
-    }
-    fn bump_until(&self, env: &Env, expiration_ledger: u32) -> &Self {
-        storage::Persistent::bump_until(env, self, expiration_ledger);
+    fn extend(&self, env: &Env, min_ledger_to_live: u32) -> &Self {
+        storage::Persistent::extend(env, self, min_ledger_to_live);
         self
     }
 

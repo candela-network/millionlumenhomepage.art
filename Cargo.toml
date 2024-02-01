@@ -9,7 +9,7 @@ members = [
 ]
 
 [workspace.dependencies]
-soroban-sdk = { version = "20.0.0-rc2", default-features = false }
+soroban-sdk = { version = "20.2.0", default-features = false }
 erc721 = { path = "./erc721", default-features = false }
 storage = { path = "./storage" }
 

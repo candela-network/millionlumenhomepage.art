@@ -8,7 +8,7 @@ use storage::Storage;
 mod types;
 use crate::types::*;
 
-const MAX_BUMP: u32 = 1_00_000;
+const MAX_BUMP: u32 = 100_000;
 
 #[cfg(test)]
 pub const MAX_SUPPLY: u32 = 0xff;
@@ -27,16 +27,16 @@ pub struct Million;
 #[contractimpl]
 impl Million {
     pub fn initialize(env: Env, admin: Address, asset: Address, price: i128) {
-        let name = String::from_slice(&env, "Pixel");
-        let sym = String::from_slice(&env, "PIX");
+        let name = String::from_str(&env, "Pixel");
+        let sym = String::from_str(&env, "PIX");
         MillionDataKey::TokenId
-            .bump(&env, MAX_BUMP)
+            .extend(&env, MAX_BUMP)
             .set::<u32>(&env, &0);
         MillionDataKey::AssetAddress
-            .bump(&env, MAX_BUMP)
+            .extend(&env, MAX_BUMP)
             .set::<Address>(&env, &asset);
         MillionDataKey::Price
-            .bump(&env, MAX_BUMP)
+            .extend(&env, MAX_BUMP)
             .set::<i128>(&env, &price);
         erc721::ERC721Contract::initialize(env, admin, name, sym);
     }
@@ -89,10 +89,10 @@ impl Million {
 
         // Mint
         erc721::ERC721Contract::mint(env.clone(), to.clone(), token_id);
-        DataKey::Balance(to).bump(&env, MAX_BUMP);
-        DataKey::TokenOwner(token_id).bump(&env, MAX_BUMP);
-        Coords::Token(x, y).bump(&env, MAX_BUMP);
-        Coords::Xy(token_id).bump(&env, MAX_BUMP);
+        DataKey::Balance(to).extend(&env, MAX_BUMP);
+        DataKey::TokenOwner(token_id).extend(&env, MAX_BUMP);
+        Coords::Token(x, y).extend(&env, MAX_BUMP);
+        Coords::Xy(token_id).extend(&env, MAX_BUMP);
         Ok(token_id)
     }
 
@@ -165,7 +165,7 @@ impl Million {
             uri.copy_into_slice(&mut slice);
             let struri = core::str::from_utf8(slice.as_slice()).unwrap();
 
-            String::from_slice(&env, struri)
+            String::from_str(&env, struri)
         } else {
             panic_with_error!(&env, Error::NotNFT);
         }
@@ -173,7 +173,7 @@ impl Million {
 
     pub fn total_supply(env: Env) -> u32 {
         MillionDataKey::TokenId
-            .bump(&env, 1000)
+            .extend(&env, 1000)
             .get(&env)
             .unwrap_or(0)
     }

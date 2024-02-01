@@ -30,7 +30,7 @@ export async function get({params, request}) {
   } catch (e) {
 
     console.log(id)
-    let xy = await million.coords({token_id: parseInt(id)})
+    let xy = await million.coords({token_id: 0})
     data.coords = xy;
     fs.writeFile(filename, JSON.stringify(data));
   }
